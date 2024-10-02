@@ -4,8 +4,8 @@
 
 /* Linking*/
 #pragma comment(lib, "d3d11.lib")
-#pragma cooment(lib, "dxgi.lib")
-#pragma comment(lib, "d3compiler.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 
 /* Includes */
 #include <d3d11.h>
