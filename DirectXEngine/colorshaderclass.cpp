@@ -24,11 +24,11 @@ bool ColorShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	int error; 
 
 	// Set the filename of the vertex shader. 
-	error = wcscpy_s(vsFilename, 128, L"../DirectXEngine/color.vs");
+	error = wcscpy_s(vsFilename, 128, L"C:\DirectXProject\DirectX_Learning\DirectXEngine\color.vs");
 	if (error != 0) { return false; }
 
 	// Set the filename of the pixel shader. 
-	error = wcscpy_s(psFilename, 128, L"../DirectXEngine/color.ps"); 
+	error = wcscpy_s(psFilename, 128, L"C:\DirectXProject\DirectX_Learning\DirectXEngine\color.ps"); 
 	if (error != 0) { return false; }
 
 	// Initialize the vertex and pixel shaders. 

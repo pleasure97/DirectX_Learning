@@ -36,12 +36,12 @@ bool SystemClass::Initialize()
 
 	// Create and initialize the input object.  This object will be used to handle reading the keyboard input from the user.
 	m_Input = new InputClass;
-	
+
 	m_Input->Initialize();
 
 	// Create and initialize the application class object.  This object will handle rendering all the graphics for this application.
 	m_Application = new ApplicationClass;
-	
+
 	result = m_Application->Initialize(screenWidth, screenHeight, m_hwnd);
 	if(!result)
 	{
@@ -62,7 +62,7 @@ void SystemClass::Shutdown()
 		m_Application = 0;
 	}
 
-	// Release the input class object.
+	// Release the input object.
 	if(m_Input)
 	{
 		delete m_Input;
