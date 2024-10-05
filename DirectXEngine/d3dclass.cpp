@@ -557,8 +557,32 @@ void D3DClass::TurnZBufferOff()
 
 void D3DClass::EnableAlphaBlending()
 {
+	float blendFactor[4]; 
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.f;
+	blendFactor[1] = 0.f;
+	blendFactor[2] = 0.f;
+	blendFactor[3] = 0.f;
+
+	// Turn on the alpha blending. 
+	m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
+
+	return; 
 }
 
 void D3DClass::DisableAlphaBlending()
 {
+	float blendFactor[4]; 
+
+	// Setup the blend factor. 
+	blendFactor[0] = 0.f;
+	blendFactor[1] = 0.f;
+	blendFactor[2] = 0.f;
+	blendFactor[3] = 0.f;
+
+	// Turn off the alpha blending. 
+	m_deviceContext->OMSetBlendState(m_alphaDisabledBlendingState, blendFactor, 0xffffffff); 
+
+	return; 
 }

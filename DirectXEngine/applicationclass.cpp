@@ -8,9 +8,8 @@ ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_TextureShader = 0; 
-	m_Sprite = 0; 
-	m_Timer = 0; 
+	m_MultiTextureShader = 0; 
+	m_Model = 0;
 }
 
 
@@ -26,7 +25,9 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
-	char spriteFilename[128]; 
+	char modelFilename[128]; 
+	char textureFilename1[128]; 
+	char textureFilename2[128]; 
 	bool result;
 
 
@@ -44,34 +45,31 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera = new CameraClass;
 
 	// Set the initial position of the camera.
-	m_Camera->SetPosition(0.0f, 0.f, -10.f);
+	m_Camera->SetPosition(0.0f, 0.f, -5.f);
 	m_Camera->Render(); 
 
-	// Create and initialize the texture shader object. 
-	m_TextureShader = new TextureShaderClass;
+	// Create and initialize the multitexture shader object. 
+	m_MultiTextureShader = new MultiTextureShaderClass;
 
-	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
+	result = m_MultiTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK); 
-		return false;
+		MessageBox(hwnd, L"Could not initialize the multitexture shader object.", L"Error", MB_OK); 
+		return false; 
 	}
 
-	// Set the sprite info file we'll be using. 
-	strcpy_s(spriteFilename, "../DirectXEngine/data/sprite_data_01.txt"); 
+	// Set the file name of the model.
+	strcpy_s(modelFilename, "../DirectXEngine/data/square.txt"); 
 
-	// Create and initialize the sprite object. 
-	m_Sprite = new SpriteClass; 
+	// Set the file name of the textures. 
+	strcpy_s(textureFilename1, "../DirectXEngine/data/ston01.tga");
+	strcpy_s(textureFilename2, "../DirectXEngine/data/dirt01.tga");
 
-	result = m_Sprite->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), screenWidth, screenHeight, spriteFilename, 50, 50); 
+	// Create and initialize the model object. 
+	m_Model = new ModelClass; 
+
+	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename1, textureFilename2); 
 	if (!result) { return false; }
-
-	// Create and initialize the timer object. 
-	m_Timer = new TimerClass;
-
-	result = m_Timer->Initialize(); 
-	if (!result) { return false; }
-
 
 	return true;
 }
@@ -79,27 +77,20 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the timer object.
-	if (m_Timer)
+	// Release the model object. 
+	if (m_Model)
 	{
-		delete m_Timer;
-		m_Timer = 0; 
+		m_Model->Shutdown(); 
+		delete m_Model; 
+		m_Model = 0;
 	}
 
-	// Relase the sprite object. 
-	if (m_Sprite)
+	// Release the multitexture shader object. 
+	if (m_MultiTextureShader)
 	{
-		m_Sprite->Shutdown(); 
-		delete m_Sprite; 
-		m_Sprite = 0; 
-	}
-
-	// Release the texture shader object. 
-	if (m_TextureShader)
-	{
-		m_TextureShader->Shutdown(); 
-		delete m_TextureShader;
-		m_TextureShader = 0; 
+		m_MultiTextureShader->Shutdown(); 
+		delete m_MultiTextureShader; 
+		m_MultiTextureShader = 0; 
 	}
 
 	// Release the camera object.
@@ -121,34 +112,35 @@ void ApplicationClass::Shutdown()
 }
 
 
-bool ApplicationClass::Frame()
+bool ApplicationClass::Frame(InputClass* Input)
 {
-	float frameTime;
-	bool result;
+	int mouseX, mouseY; 
+	bool result; 
+	bool mouseDown;
 
-	// Update the system stats.
-	m_Timer->Frame(); 
-
-	// Get the current frame time. 
-	frameTime = m_Timer->GetTime(); 
-
-	// Update the sprite object using the frame time. 
-	m_Sprite->Update(frameTime); 
-
-	// Render the graphics scene.
-	result = Render();
-	if(!result)
+	// Check if the user processed escape and wants to exit the program. 
+	if (Input->IsEscapePressed())
 	{
 		return false;
 	}
 
-	return true;
+	// Get the location of the mouse from the input object. 
+	Input->GetMouseLocation(mouseX, mouseY); 
+
+	// Check if the mouse has been pressed.
+	mouseDown = Input->IsMousePressed(); 
+
+	// Render the graphics scene. 
+	result = Render(); 
+	if (!result) { return false; }
+
+	return true; 
 }
 
 
 bool ApplicationClass::Render()
 {
-	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
 
 
@@ -161,24 +153,18 @@ bool ApplicationClass::Render()
 	// Get the world, view, and projection matrices from the camera and d3d objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix); 
+	m_Direct3D->GetProjectionMatrix(projectionMatrix); 
 
-	// Turn off Z buffer to begin all 2D rendering.
-	m_Direct3D->TurnZBufferOff();
+	// Render the model using the multitexture shader. 
+	m_Model->Render(m_Direct3D->GetDeviceContext()); 
 
-	// Put the sprite vertex and index buffers on the graphcis pipeline to preprae them for drawing. 
-	result = m_Sprite->Render(m_Direct3D->GetDeviceContext()); 
+	result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(0), m_Model->GetTexture(1));
 	if (!result) { return false; }
-
-	// Render the sprite with the texture shader. 
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Sprite->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Sprite->GetTexture()); 
-	if (!result) { return false; }
-
-	// turn the Z buffer back on now that all 2D rendering has completed. 
-	m_Direct3D->TurnZBufferOn();
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();
 
 	return true;
 }
+
+
