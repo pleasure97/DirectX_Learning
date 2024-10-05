@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="alphamapshaderclass.cpp" />
     <ClCompile Include="applicationclass.cpp" />
     <ClCompile Include="bitmapclass.cpp" />
     <ClCompile Include="cameraclass.cpp" />
@@ -137,10 +138,12 @@
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
+    <ClCompile Include="lightmapshaderclass.cpp" />
     <ClCompile Include="lightshaderclass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modelclass.cpp" />
     <ClCompile Include="multitextureshaderclass.cpp" />
+    <ClCompile Include="normalmapshaderclass.cpp" />
     <ClCompile Include="spriteclass.cpp" />
     <ClCompile Include="systemclass.cpp" />
     <ClCompile Include="textclass.cpp" />
@@ -149,6 +152,7 @@
     <ClCompile Include="timerclass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alphamapshaderclass.h" />
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="bitmapclass.h" />
     <ClInclude Include="cameraclass.h" />
@@ -159,9 +163,11 @@
     <ClInclude Include="fpsclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="lightclass.h" />
+    <ClInclude Include="lightmapshaderclass.h" />
     <ClInclude Include="lightshaderclass.h" />
     <ClInclude Include="modelclass.h" />
     <ClInclude Include="multitextureshaderclass.h" />
+    <ClInclude Include="normalmapshaderclass.h" />
     <ClInclude Include="spriteclass.h" />
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="textclass.h" />
@@ -170,14 +176,22 @@
     <ClInclude Include="timerclass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="alphamap.ps" />
+    <None Include="alphamap.vs" />
     <None Include="color.ps" />
     <None Include="color.vs" />
     <None Include="font.ps" />
     <None Include="font.vs" />
     <None Include="light.ps" />
     <None Include="light.vs" />
+    <None Include="lightmap.ps" />
+    <None Include="lightmap.vs" />
     <None Include="multitexture.ps" />
     <None Include="multitexture.vs" />
+    <None Include="normalmap.ps" />
+    <None Include="normalmap.vs" />
+    <None Include="specmap.ps" />
+    <None Include="specmap.vs" />
     <None Include="texture.ps" />
     <None Include="texture.vs" />
   </ItemGroup>

@@ -9,10 +9,12 @@
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "d3dclass.h"
-#include "cameraclass.h"
 #include "inputclass.h"
-#include "multitextureshaderclass.h"
+#include "cameraclass.h"
+#include "normalmapshaderclass.h"
 #include "modelclass.h"
+#include "lightclass.h"
+
 
 /////////////
 // GLOBALS //
@@ -38,15 +40,14 @@ public:
 	bool Frame(InputClass*);
 
 private:
-	bool Render();
+	bool Render(float);
 
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
-	
-	MultiTextureShaderClass* m_MultiTextureShader; 
-	ModelClass* m_Model; 
-
+	NormalMapShaderClass* m_NormalMapShader; 
+	ModelClass* m_Model;
+	LightClass* m_Light; 
 };
 
 #endif

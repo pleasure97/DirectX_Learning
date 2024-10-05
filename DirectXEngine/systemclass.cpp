@@ -37,8 +37,11 @@ bool SystemClass::Initialize()
 	// Create and initialize the input object.  This object will be used to handle reading the keyboard input from the user.
 	m_Input = new InputClass;
 
-	result = m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight); 
-	if (!result) { return false; }
+	result = m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		return false;
+	}
 
 	// Create and initialize the application class object.  This object will handle rendering all the graphics for this application.
 	m_Application = new ApplicationClass;
@@ -111,7 +114,6 @@ void SystemClass::Run()
 				done = true;
 			}
 		}
-
 	}
 
 	return;
@@ -122,9 +124,13 @@ bool SystemClass::Frame()
 {
 	bool result;
 
-	// Do the input frame processing. 
-	result = m_Input->Frame(); 
-	if (!result) { return false; }
+
+	// Do the input frame processing.
+	result = m_Input->Frame();
+	if(!result)
+	{
+		return false;
+	}
 
 	// Do the frame processing for the application class object.
 	result = m_Application->Frame(m_Input);
@@ -139,7 +145,7 @@ bool SystemClass::Frame()
 
 LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	return DefWindowProc(hwnd, umsg, wparam, lparam); 
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
 
