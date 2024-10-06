@@ -1,35 +1,36 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: timerclass.h
+// Filename: positionclass.h
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _TIMERCLASS_H_
-#define _TIMERCLASS_H_
+#ifndef _POSITIONCLASS_H_
+#define _POSITIONCLASS_H_
 
 
 //////////////
 // INCLUDES //
 //////////////
-#include <windows.h>
+#include <math.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Class name: TimerClass
+// Class name: PositionClass
 ////////////////////////////////////////////////////////////////////////////////
-class TimerClass
+class PositionClass
 {
 public:
-	TimerClass();
-	TimerClass(const TimerClass&);
-	~TimerClass();
+	PositionClass();
+	PositionClass(const PositionClass&);
+	~PositionClass();
 
-	bool Initialize();
-	void Frame();
+	void SetFrameTime(float);
+	void GetRotation(float&);
 
-	float GetTime();
+	void TurnLeft(bool);
+	void TurnRight(bool);
 
 private:
-	float m_frequency;
-	INT64 m_startTime;
 	float m_frameTime;
+	float m_rotationY;
+	float m_leftTurnSpeed, m_rightTurnSpeed;
 };
 
 #endif
