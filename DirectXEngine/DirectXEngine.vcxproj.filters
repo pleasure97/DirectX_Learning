@@ -102,6 +102,27 @@
     <ClCompile Include="positionclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="rendertextureclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="displayplaneclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="fogshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="clipplaneshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="translateshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="transparentshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="reflectionshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -185,6 +206,27 @@
     <ClInclude Include="positionclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="rendertextureclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="displayplaneclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="fogshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="clipplaneshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="translateshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="transparentshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="reflectionshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="color.vs">
@@ -239,6 +281,36 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="specmap.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="fog.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="fog.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="clipplane.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="clipplane.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="transparent.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="translate.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="translate.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="transparent.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="reflection.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="reflection.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
