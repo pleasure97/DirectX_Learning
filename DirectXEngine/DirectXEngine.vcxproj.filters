@@ -123,6 +123,12 @@
     <ClCompile Include="reflectionshaderclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="watershaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="refractionshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -227,6 +233,12 @@
     <ClInclude Include="reflectionshaderclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="watershaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="refractionshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="color.vs">
@@ -311,6 +323,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="reflection.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="water.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="water.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="refraction.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="refraction.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
