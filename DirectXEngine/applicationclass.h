@@ -12,9 +12,9 @@
 #include "inputclass.h"
 #include "cameraclass.h"
 #include "modelclass.h"
-#include "rendertextureclass.h"
 #include "textureshaderclass.h"
-#include "glassshaderclass.h"
+#include "positionclass.h"
+#include "timerclass.h"
 
 
 /////////////
@@ -41,17 +41,16 @@ public:
 	bool Frame(InputClass*);
 
 private:
-	bool RenderSceneToTexture(float); 
-	bool Render(float); 
+	bool Render(); 
 
 private:
 	D3DClass* m_Direct3D; 
 	CameraClass* m_Camera; 
-	ModelClass* m_Model; 
-	ModelClass* m_WindowModel;
-	RenderTextureClass* m_RenderTexture; 
 	TextureShaderClass* m_TextureShader; 
-	GlassShaderClass* m_GlassShader; 
+	ModelClass* m_FloorModel;
+	ModelClass* m_BillboardModel; 
+	PositionClass* m_Position; 
+	TimerClass* m_Timer; 
 };
 
 #endif
