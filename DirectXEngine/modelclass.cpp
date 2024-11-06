@@ -8,7 +8,6 @@ ModelClass::ModelClass()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-	m_Texture = 0;
 	m_model = 0;
 }
 
@@ -23,7 +22,7 @@ ModelClass::~ModelClass()
 }
 
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFilename, char* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFilename)
 {
 	bool result;
 
@@ -42,22 +41,12 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 		return false;
 	}
 
-	// Load the texture for this model.
-	result = LoadTexture(device, deviceContext, textureFilename);
-	if(!result)
-	{
-		return false;
-	}
-
 	return true;
 }
 
 
 void ModelClass::Shutdown()
 {
-	// Release the model texture.
-	ReleaseTexture();
-
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
 
@@ -82,13 +71,6 @@ int ModelClass::GetIndexCount()
 	return m_indexCount;
 }
 
-
-ID3D11ShaderResourceView* ModelClass::GetTexture()
-{
-	return m_Texture->GetTexture();
-}
-
-
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
 	VertexType* vertices;
@@ -106,7 +88,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	indices = new unsigned long[m_indexCount];
 
 	// Load the vertex array and index array with data.
-	for(i=0; i<m_vertexCount; i++)
+	for(i = 0; i < m_vertexCount; i++)
 	{
 		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
 		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
@@ -207,39 +189,6 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	return;
 }
-
-
-bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
-{
-	bool result;
-
-
-	// Create and initialize the texture object.
-	m_Texture = new TextureClass;
-
-	result = m_Texture->Initialize(device, deviceContext, filename);
-	if(!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-void ModelClass::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
-
-	return;
-}
-
 
 bool ModelClass::LoadModel(char* filename)
 {

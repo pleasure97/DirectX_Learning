@@ -130,10 +130,13 @@
     <ClCompile Include="alphamapshaderclass.cpp" />
     <ClCompile Include="applicationclass.cpp" />
     <ClCompile Include="bitmapclass.cpp" />
+    <ClCompile Include="blurclass.cpp" />
+    <ClCompile Include="blurshaderclass.cpp" />
     <ClCompile Include="cameraclass.cpp" />
     <ClCompile Include="clipplaneshaderclass.cpp" />
     <ClCompile Include="colorshaderclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
+    <ClCompile Include="depthshaderclass.cpp" />
     <ClCompile Include="displayplaneclass.cpp" />
     <ClCompile Include="fireshaderclass.cpp" />
     <ClCompile Include="fogshaderclass.cpp" />
@@ -151,6 +154,7 @@
     <ClCompile Include="modellistclass.cpp" />
     <ClCompile Include="multitextureshaderclass.cpp" />
     <ClCompile Include="normalmapshaderclass.cpp" />
+    <ClCompile Include="orthowindowclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
     <ClCompile Include="reflectionshaderclass.cpp" />
     <ClCompile Include="refractionshaderclass.cpp" />
@@ -171,10 +175,13 @@
     <ClInclude Include="alphamapshaderclass.h" />
     <ClInclude Include="applicationclass.h" />
     <ClInclude Include="bitmapclass.h" />
+    <ClInclude Include="blurclass.h" />
+    <ClInclude Include="blurshaderclass.h" />
     <ClInclude Include="cameraclass.h" />
     <ClInclude Include="clipplaneshaderclass.h" />
     <ClInclude Include="colorshaderclass.h" />
     <ClInclude Include="d3dclass.h" />
+    <ClInclude Include="depthshaderclass.h" />
     <ClInclude Include="displayplaneclass.h" />
     <ClInclude Include="fireshaderclass.h" />
     <ClInclude Include="fogshaderclass.h" />
@@ -191,6 +198,7 @@
     <ClInclude Include="modellistclass.h" />
     <ClInclude Include="multitextureshaderclass.h" />
     <ClInclude Include="normalmapshaderclass.h" />
+    <ClInclude Include="orthowindowclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="reflectionshaderclass.h" />
     <ClInclude Include="refractionshaderclass.h" />
@@ -210,10 +218,14 @@
   <ItemGroup>
     <None Include="alphamap.ps" />
     <None Include="alphamap.vs" />
+    <None Include="blur.ps" />
+    <None Include="blur.vs" />
     <None Include="clipplane.ps" />
     <None Include="clipplane.vs" />
     <None Include="color.ps" />
     <None Include="color.vs" />
+    <None Include="depth.ps" />
+    <None Include="depth.vs" />
     <None Include="fire.ps" />
     <None Include="fire.vs" />
     <None Include="fog.ps" />
