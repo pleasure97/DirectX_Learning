@@ -8,12 +8,11 @@ ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_TextureShader = 0;
-	m_Model = 0;
-	m_RenderTexture = 0;
-	m_FullScreenWindow = 0;
-	m_Blur = 0;
-	m_BlurShader = 0;
+	m_GroundModel = 0;
+	m_CubeModel = 0;
+	m_ProjectionShader = 0;
+	m_ProjectionTexture = 0;
+	m_ViewPoint = 0;;
 }
 
 
@@ -30,7 +29,6 @@ ApplicationClass::~ApplicationClass()
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	char modelFilename[128], textureFilename[128];
-	int downSampleWidth, downSampleHeight;
 	bool result;
 
 	// Create and initialize the Direct3D object.
@@ -46,76 +44,66 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
-	m_Camera->SetPosition(0.f, 0.f, -10.0f);
+	m_Camera->SetPosition(0.f, 7.f, -10.0f);
+	m_Camera->SetRotation(35.f, 0.f, 0.f); 
 	m_Camera->Render();
 
-	// Set the filenames for the floor model object.
-	// Create and initialize the model object.
-	m_Model = new ModelClass;
+	// Create and initialize the ground model object.
+	m_GroundModel = new ModelClass; 
+
+	strcpy_s(modelFilename, "../DirectXEngine/data/plane01.txt");
+	strcpy_s(textureFilename, "../DirectXEngine/data/metal001.tga");
+	
+	result = m_GroundModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename); 
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create and initialize the cube model object.
+	m_CubeModel = new ModelClass;
 
 	strcpy_s(modelFilename, "../DirectXEngine/data/cube.txt");
 	strcpy_s(textureFilename, "../DirectXEngine/data/stone01.tga");
 
-	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
+	result = m_CubeModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the cube model object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the texture shader object.
-	m_TextureShader = new TextureShaderClass;
+	// Create and initialize the projection shader object.
+	m_ProjectionShader = new ProjectionShaderClass;
 
-	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	result = m_ProjectionShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the projection shader object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the render to texture object.
-	m_RenderTexture = new RenderTextureClass;
+	// Create the projection texture object.
+	m_ProjectionTexture = new TextureClass;
 
-	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH, 0);
+	strcpy_s(textureFilename, "../DirectXEngine/data/directx_logo.tga");
+
+	result = m_ProjectionTexture->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the render texture object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the projection texture object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the full screen ortho window object.
-	m_FullScreenWindow = new OrthoWindowClass;
+	// Create and initialize the view point object.
+	m_ViewPoint = new ViewPointClass; 
 
-	result = m_FullScreenWindow->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Set the size to sample down to.
-	downSampleWidth = screenWidth / 2;
-	downSampleHeight = screenHeight / 2;
-
-	// Create and initialize the blur object.
-	m_Blur = new BlurClass;
-
-	result = m_Blur->Initialize(m_Direct3D, downSampleWidth, downSampleHeight, SCREEN_NEAR, SCREEN_DEPTH, screenWidth, screenHeight);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the blur object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the blur shader object.
-	m_BlurShader = new BlurShaderClass;
-
-	result = m_BlurShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the blur shader object.", L"Error", MB_OK);
-		return false;
-	}
+	m_ViewPoint->SetPosition(2.f, 5.f, -2.f); 
+	m_ViewPoint->SetLookAt(0.f, 0.f, 0.f); 
+	m_ViewPoint->SetProjectionParameters((3.14159265358979323846f / 2.0f), 1.f, 0.1f, 100.f);
+	m_ViewPoint->GenerateViewMatrix(); 
+	m_ViewPoint->GenerateProjectionMatrix(); 
 
 	return true;
 }
@@ -123,52 +111,43 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the blur shader object.
-	if (m_BlurShader)
+	// Release the view point object.
+	if (m_ViewPoint)
 	{
-		m_BlurShader->Shutdown();
-		delete m_BlurShader;
-		m_BlurShader = 0;
+		delete m_ViewPoint;
+		m_ViewPoint = 0;
 	}
 
-	// Release the blur object.
-	if (m_Blur)
+	// Release the projection texture object.
+	if (m_ProjectionTexture)
 	{
-		m_Blur->Shutdown();
-		delete m_Blur;
-		m_Blur = 0;
+		m_ProjectionTexture->Shutdown();
+		delete m_ProjectionTexture;
+		m_ProjectionTexture = 0;
 	}
 
-	// Release the full screen ortho window object.
-	if (m_FullScreenWindow)
+	// Release the projection shader object.
+	if (m_ProjectionShader)
 	{
-		m_FullScreenWindow->Shutdown();
-		delete m_FullScreenWindow;
-		m_FullScreenWindow = 0;
+		m_ProjectionShader->Shutdown();
+		delete m_ProjectionShader;
+		m_ProjectionShader = 0;
 	}
 
-	// Release the render texture object.
-	if (m_RenderTexture)
+	// Release the cube model object.
+	if (m_CubeModel)
 	{
-		m_RenderTexture->Shutdown();
-		delete m_RenderTexture;
-		m_RenderTexture = 0;
+		m_CubeModel->Shutdown();
+		delete m_CubeModel;
+		m_CubeModel = 0;
 	}
 
-	// Release the texture shader object.
-	if (m_TextureShader)
+	// Release the ground model object.
+	if (m_GroundModel)
 	{
-		m_TextureShader->Shutdown();
-		delete m_TextureShader;
-		m_TextureShader = 0;
-	}
-
-	// Release the model object.
-	if (m_Model)
-	{
-		m_Model->Shutdown();
-		delete m_Model;
-		m_Model = 0;
+		m_GroundModel->Shutdown();
+		delete m_GroundModel;
+		m_GroundModel = 0;
 	}
 
 	// Release the camera object.
@@ -192,34 +171,12 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame(InputClass* Input)
 {
-	static float rotation = 0.f; 
 	bool result;
 
 	// Check if the user pressed escape and wants to exit the application.
 	if (Input->IsEscapePressed())
 	{
 		return false;
-	}
-
-	// Update the rotation variable each frame.
-	rotation -= 0.0174532925f * 0.25f;
-	if (rotation < 0.0f)
-	{
-		rotation += 360.0f;
-	}
-
-	// Render the scene to a render texture.
-	result = RenderSceneToTexture(rotation);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Blur the texture using the BlurClass object.
-	result = m_Blur->BlurTexture(m_Direct3D, m_Camera, m_RenderTexture, m_TextureShader, m_BlurShader);
-	if (!result)
-	{
-		return true;
 	}
 
 	// Render the graphics scene.
@@ -233,43 +190,10 @@ bool ApplicationClass::Frame(InputClass* Input)
 }
 
 
-bool ApplicationClass::RenderSceneToTexture(float rotation)
-{
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix; 
-	bool result; 
-
-	// Set the render target to be the render texture and clear it.
-	m_RenderTexture->SetRenderTarget(m_Direct3D->GetDeviceContext()); 
-	m_RenderTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.f, 0.f, 0.f, 1.f); 
-
-	// Get the matrices.
-	m_Direct3D->GetWorldMatrix(worldMatrix); 
-	m_Camera->GetViewMatrix(viewMatrix); 
-	m_RenderTexture->GetProjectionMatrix(projectionMatrix); 
-
-	// Rotate the world matrix by the rotation value so that the triangle will spin. 
-	worldMatrix = XMMatrixRotationY(rotation); 
-
-	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_Model->Render(m_Direct3D->GetDeviceContext()); 
-
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture()); 
-	if (!result)
-	{
-		return false;
-	}
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore. 
-	// And reset the viewport back to the original.
-	m_Direct3D->SetBackBufferRenderTarget(); 
-	m_Direct3D->ResetViewport(); 
-
-	return true; 
-}
-
 bool ApplicationClass::Render()
 {
-	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	XMMATRIX viewMatrix2, projectionMatrix2;
 	bool result;
 
 	// Clear the buffers to begin the scene.
@@ -278,18 +202,40 @@ bool ApplicationClass::Render()
 	// Get the world, view, and projection matrices from the camera and d3d objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix); 
 	m_Camera->GetViewMatrix(viewMatrix); 
-	m_Direct3D->GetOrthoMatrix(orthoMatrix); 
+	m_Direct3D->GetProjectionMatrix(projectionMatrix); 
 
-	// Render the full screen ortho window.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext()); 
+	// Get the view and projection matrices from the view point object.
+	m_ViewPoint->GetViewMatrix(viewMatrix2);
+	m_ViewPoint->GetProjectionMatrix(projectionMatrix2);
 
-	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(),
-		worldMatrix, viewMatrix, orthoMatrix,
-		m_RenderTexture->GetShaderResourceView()); 
+	// Setup the translation for the ground model.
+	worldMatrix = XMMatrixTranslation(0.f, 1.f, 0.f); 
+
+	// Render the ground model using the projection matrix.
+	m_GroundModel->Render(m_Direct3D->GetDeviceContext()); 
+
+	result = m_ProjectionShader->Render(m_Direct3D->GetDeviceContext(), m_GroundModel->GetIndexCount(), 
+		worldMatrix, viewMatrix, projectionMatrix, 
+		viewMatrix2, projectionMatrix2, 
+		m_GroundModel->GetTexture(), m_ProjectionTexture->GetTexture()); 
 	if (!result)
 	{
 		return false;
+	}
+
+	// Setup the translation for the cube model.
+	worldMatrix = XMMatrixTranslation(0.f, 2.f, 0.f);
+
+	// Render the cube model using the projection shader.
+	m_CubeModel->Render(m_Direct3D->GetDeviceContext()); 
+
+	result = m_ProjectionShader->Render(m_Direct3D->GetDeviceContext(), m_CubeModel->GetIndexCount(),
+		worldMatrix, viewMatrix, projectionMatrix,
+		viewMatrix2, projectionMatrix2,
+		m_CubeModel->GetTexture(), m_ProjectionTexture->GetTexture()); 
+	if (!result)
+	{
+		return false; 
 	}
 
 	// Present the rendered scene to the screen.

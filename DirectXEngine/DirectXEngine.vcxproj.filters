@@ -147,6 +147,21 @@
     <ClCompile Include="blurclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="fadeshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="particleshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="particlesystemclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="projectionshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="viewpointclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -275,6 +290,21 @@
     <ClInclude Include="blurclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="fadeshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="particleshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="particlesystemclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="projectionshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="viewpointclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="color.vs">
@@ -391,7 +421,29 @@
     <None Include="depth.vs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="blur.vs" />
-    <None Include="blur.ps" />
+    <None Include="fade.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="blur.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="blur.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="fade.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="particle.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="particle.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="projection.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="projection.vs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
