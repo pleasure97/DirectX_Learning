@@ -19,22 +19,7 @@ float4 DepthPixelShader(PixelInputType input) : SV_TARGET
 	// Get the depth value of the pixel by dividing the Z pixel depth by the homogeneous W coordinate. 
 	depthValue = input.depthPosition.z / input.depthPosition.w ; 
 
-	// First 10% of the depth buffer color red. 
-	if (depthValue < 0.9f)
-	{
-		color = float4(1.f, 0.f, 0.f, 1.f); 
-	}
-
-	// The next 0.025% portion of the depth buffer color green. 
-	if (depthValue > 0.9f)
-	{
-		color = float4(0.f, 1.f, 0.f, 1.f); 
-	}
-
-	// The remainder of the depth buffer color blue
-	{
-		color = float4(0.f, 0.f, 1.f, 1.f); 
-	}
+	color = float4(depthValue, depthValue, depthValue, 1.f); 
 
 	return color; 
 }

@@ -14,7 +14,21 @@ struct PixelInputType
 {
 	float4 position : SV_POSITION; 
 	float2 tex : TEXCOORD0; 
+	float3 normal : NORMAL; 
 	float4 viewPosition : TEXCOORD1; 
+	float3 lightPos : TEXCOORD2; 
+};
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+
+cbuffer LightBuffer
+{
+	float4 ambientColor; 
+	float4 diffuseColor; 
+	float brightness; 
+	float3 padding; 
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,8 +37,23 @@ struct PixelInputType
 
 float4 ProjectionPixelShader(PixelInputType input) : SV_TARGET
 {
-	float2 projectTexCoord; 
+	float lightIntensity; 
 	float4 color; 
+	float4 textureColor; 
+	float2 projectTexCoord; 
+	float4 projectionColor; 
+
+	// Calculate the amount of light on this pixel.
+	lightIntensity = saturate(dot(input.normal, input.lightPos)); 
+
+	if (lightIntensity > 0.f)
+	{
+		// Determine the light color based on the diffuse color and the amount of light intensity.
+		color = (diffuseColor * lightIntensity) * brightness; 
+	}
+
+	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
+	textureColor = shaderTexture.Sample(SampleType, input.tex); 
 
 	// Calculate the projected texture coordinates.
 	projectTexCoord.x = input.viewPosition.x / input.viewPosition.w / 2.f + 0.5f; 
@@ -36,11 +65,13 @@ float4 ProjectionPixelShader(PixelInputType input) : SV_TARGET
 	{
 		// Sample the color value from the projection texture using the sampler at the projected texture coordinate location. 
 		color = projectionTexture.Sample(SampleType, projectTexCoord); 
+
+		// Set the output color of this pixel to the projection texture overriding the regular color value.
+		color = saturate((color * projectionColor * textureColor) + (ambientColor * textureColor)); 
 	}
 	else
 	{
-		// Sample the pixel color from the texture using the sampler at this texture coordinate location.
-		color = shaderTexture.Sample(SampleType, input.tex); 
+		color = ambientColor * textureColor; 
 	}
 
 	return color; 

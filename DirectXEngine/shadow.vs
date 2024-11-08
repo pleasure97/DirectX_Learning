@@ -4,19 +4,13 @@
 
 cbuffer MatrixBuffer
 {
-	matrix worldMatrix; 
-	matrix viewMatrix; 
-	matrix projectionMatrix; 
-
-	matrix viewMatrix2; 
-	matrix projectionMatrix2;
+	matrix worldMatrix;
+	matrix viewMatrix;
+	matrix projectionMatrix;
+	matrix lightViewMatrix;
+	matrix lightProjectionMatrix;
 };
 
-cbuffer LightPositionBuffer
-{
-	float3 lightPosition;
-	float padding; 
-};
 
 //////////////
 // TYPEDEFS //
@@ -33,18 +27,17 @@ struct PixelInputType
 {
 	float4 position : SV_POSITION; 
 	float2 tex : TEXCOORD0; 
-	float3 normal : NORMAL; 
-	float4 viewPosition : TEXCOORD1; 
-	float3 lightPos : TEXCOORD2; 
+	float3 normal : NORMAL;
+	float4 lightViewPosition : TEXCOORD1; 
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vertex Shader
 ////////////////////////////////////////////////////////////////////////////////
-PixelInputType ProjectionVertexShader(VertexInputType input)
+PixelInputType ShadowVertexShader(VertexInputType input)
 {
 	PixelInputType output; 
-	float4 worldPosition; 
+	float4 worldPosition;
 
 	// Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
@@ -54,10 +47,10 @@ PixelInputType ProjectionVertexShader(VertexInputType input)
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 
-	// Store the position of the vertice as viewed by the projection view point in a separate variable.
-	output.viewPosition = mul(input.position, worldMatrix); 
-	output.viewPosition = mul(output.viewPosition, viewMatrix2); 
-	output.viewPosition = mul(output.viewPosition, projectionMatrix2); 
+	// Calculate the position of the vertices as viewed by the light source.
+	output.lightViewPosition = mul(input.position, worldMatrix); 
+	output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix); 
+	output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix); 
 
 	// Store the texture coordinates for the pixel shader.
 	output.tex = input.tex; 
@@ -66,19 +59,7 @@ PixelInputType ProjectionVertexShader(VertexInputType input)
 	output.normal = mul(input.normal, (float3x3)worldMatrix); 
 
 	// Normalize the normal vector.
-	output.normal = normalize(output.normal); 
-
-	// Calculate the position of the vertex in the world.
-	worldPosition = mul(input.position, worldMatrix); 
-
-	// Determine the light position based on the position of the light and the position of the vertex in the world.
-	output.lightPos = lightPosition.xyz - worldPosition.xyz; 
-
-	// Normalize the light position vector.
-	output.lightPos = normalize(output.lightPos); 
+	output.normal = normalize(output.normal);
 
 	return output; 
 }
-
-
-

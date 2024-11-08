@@ -164,6 +164,7 @@
     <ClCompile Include="refractionshaderclass.cpp" />
     <ClCompile Include="rendertextureclass.cpp" />
     <ClCompile Include="shadermanagerclass.cpp" />
+    <ClCompile Include="shadowshaderclass.cpp" />
     <ClCompile Include="specmapshaderclass.cpp" />
     <ClCompile Include="spriteclass.cpp" />
     <ClCompile Include="systemclass.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="refractionshaderclass.h" />
     <ClInclude Include="rendertextureclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
+    <ClInclude Include="shadowshaderclass.h" />
     <ClInclude Include="specmapshaderclass.h" />
     <ClInclude Include="spriteclass.h" />
     <ClInclude Include="systemclass.h" />
@@ -262,6 +264,8 @@
     <None Include="reflection.vs" />
     <None Include="refraction.ps" />
     <None Include="refraction.vs" />
+    <None Include="shadow.ps" />
+    <None Include="shadow.vs" />
     <None Include="specmap.ps" />
     <None Include="specmap.vs" />
     <None Include="texture.ps" />

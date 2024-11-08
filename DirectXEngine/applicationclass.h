@@ -12,8 +12,10 @@
 #include "inputclass.h"
 #include "cameraclass.h"
 #include "modelclass.h"
-#include "projectionshaderclass.h"
-#include "viewpointclass.h"
+#include "lightclass.h"
+#include "rendertextureclass.h"
+#include "depthshaderclass.h"
+#include "shadowshaderclass.h"
 
 
 /////////////
@@ -21,8 +23,12 @@
 /////////////
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
-const float SCREEN_DEPTH = 1000.0f;
-const float SCREEN_NEAR = 0.3f;
+const float SCREEN_DEPTH = 100.0f;
+const float SCREEN_NEAR = 1.f;
+const int SHADOWMAP_WIDTH = 1024;
+const int SHADOWMAP_HEIGHT = 1024;
+const float SHADOWMAP_DEPTH = 50.f; 
+const float SHADOWMAP_NEAR = 1.f; 
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,16 +46,20 @@ public:
 	bool Frame(InputClass*);
 
 private:
+	bool RenderDepthToTexture(); 
 	bool Render(); 
 
 private:
 	D3DClass* m_Direct3D; 
 	CameraClass* m_Camera; 
 	ModelClass* m_GroundModel;
+	ModelClass* m_SphereModel; 
 	ModelClass* m_CubeModel; 
-	ProjectionShaderClass* m_ProjectionShader;
-	TextureClass* m_ProjectionTexture; 
-	ViewPointClass* m_ViewPoint; 
+	LightClass* m_Light; 
+	RenderTextureClass* m_RenderTexture; 
+	DepthShaderClass* m_DepthShader; 
+	ShadowShaderClass* m_ShadowShader; 
+	float m_shadowMapBias; 
 };
 
 #endif

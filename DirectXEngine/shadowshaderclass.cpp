@@ -1,39 +1,39 @@
-#include "projectionshaderclass.h"
+#include "shadowshaderclass.h"
 
-ProjectionShaderClass::ProjectionShaderClass()
+ShadowShaderClass::ShadowShaderClass()
 {
-	m_vertexShader = 0;
-	m_pixelShader = 0;
-	m_layout = 0;
-	m_matrixBuffer = 0;
-	m_sampleState = 0;
-    m_lightPositionBuffer = 0;
+    m_vertexShader = 0;
+    m_pixelShader = 0;
+    m_layout = 0;
+    m_matrixBuffer = 0;
+    m_sampleStateClamp = 0;
+    m_sampleStateWrap = 0;
     m_lightBuffer = 0;
 }
 
-ProjectionShaderClass::ProjectionShaderClass(const ProjectionShaderClass&)
+ShadowShaderClass::ShadowShaderClass(const ShadowShaderClass&)
 {
 }
 
-ProjectionShaderClass::~ProjectionShaderClass()
+ShadowShaderClass::~ShadowShaderClass()
 {
 }
 
-bool ProjectionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+bool ShadowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
-	wchar_t vsFilename[128], psFilename[128];
-	int error;
-	bool result;
+    wchar_t vsFilename[128], psFilename[128];
+    int error;
+    bool result;
 
     // Set the filename of the vertex shader.
-    error = wcscpy_s(vsFilename, 128, L"../DirectXEngine/projection.vs");
+    error = wcscpy_s(vsFilename, 128, L"../DirectXEngine/shadow.vs");
     if (error != 0)
     {
         return false;
     }
 
     // Set the filename of the pixel shader.
-    error = wcscpy_s(psFilename, 128, L"../DirectXEngine/projection.ps");
+    error = wcscpy_s(psFilename, 128, L"../DirectXEngine/shadow.ps");
     if (error != 0)
     {
         return false;
@@ -49,7 +49,7 @@ bool ProjectionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
     return true;
 }
 
-void ProjectionShaderClass::Shutdown()
+void ShadowShaderClass::Shutdown()
 {
     // Shutdown the vertex and pixel shaders as well as the related objects.
     ShutdownShader();
@@ -57,20 +57,20 @@ void ProjectionShaderClass::Shutdown()
     return;
 }
 
-bool ProjectionShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, 
-    XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-    XMMATRIX viewMatrix2, XMMATRIX projectionMatrix2, 
-    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* projectionTexture,
-    XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor, XMFLOAT3 lightPosition, float brightness)
+bool ShadowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, 
+    XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix, 
+    XMMATRIX lightViewMatrix, XMMATRIX lightProjectionMatrix, 
+    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, 
+    XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor, XMFLOAT3 lightDirection, float bias)
 {
     bool result;
 
     // Set the shader parameters that it will use for rendering.
     result = SetShaderParameters(deviceContext, 
         worldMatrix, viewMatrix, projectionMatrix, 
-        viewMatrix2, projectionMatrix2, 
-        texture, projectionTexture, 
-        ambientColor, diffuseColor, lightPosition, brightness);
+        lightViewMatrix, lightProjectionMatrix, 
+        texture, depthMapTexture,
+        ambientColor, diffuseColor, lightDirection, bias);
     if (!result)
     {
         return false;
@@ -82,18 +82,17 @@ bool ProjectionShaderClass::Render(ID3D11DeviceContext* deviceContext, int index
     return true;
 }
 
-bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool ShadowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
-    HRESULT result;
+    HRESULT result; 
     ID3D10Blob* errorMessage;
-    ID3D10Blob* vertexShaderBuffer;
-    ID3D10Blob* pixelShaderBuffer;
-    D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
-    unsigned int numElements;
+    ID3D10Blob* vertexShaderBuffer; 
+    ID3D10Blob* pixelShaderBuffer; 
+    D3D11_INPUT_ELEMENT_DESC polygonLayout[3]; 
+    unsigned int numElements; 
     D3D11_BUFFER_DESC matrixBufferDesc;
     D3D11_SAMPLER_DESC samplerDesc;
-    D3D11_BUFFER_DESC lightBufferDesc;
-    D3D11_BUFFER_DESC lightPositionBufferDesc; 
+    D3D11_BUFFER_DESC lightBufferDesc; 
 
     // Initialize the pointers this function will use to null.
     errorMessage = 0;
@@ -101,7 +100,7 @@ bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WC
     pixelShaderBuffer = 0;
 
     // Compile the vertex shader code.
-    result = D3DCompileFromFile(vsFilename, NULL, NULL, "ProjectionVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+    result = D3DCompileFromFile(vsFilename, NULL, NULL, "ShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
         &vertexShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -120,7 +119,7 @@ bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WC
     }
 
     // Compile the pixel shader code.
-    result = D3DCompileFromFile(psFilename, NULL, NULL, "ProjectionPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+    result = D3DCompileFromFile(psFilename, NULL, NULL, "ShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
         &pixelShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -169,13 +168,13 @@ bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WC
     polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     polygonLayout[1].InstanceDataStepRate = 0;
 
-    polygonLayout[2].SemanticName = "NORMAL"; 
-    polygonLayout[2].SemanticIndex = 0; 
-    polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT; 
-    polygonLayout[2].InputSlot = 0; 
-    polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT; 
-    polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA; 
-    polygonLayout[2].InstanceDataStepRate = 0; 
+    polygonLayout[2].SemanticName = "NORMAL";
+    polygonLayout[2].SemanticIndex = 0;
+    polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    polygonLayout[2].InputSlot = 0;
+    polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+    polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    polygonLayout[2].InstanceDataStepRate = 0;
 
     // Get a count of the elements in the layout.
     numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
@@ -209,7 +208,7 @@ bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WC
         return false;
     }
 
-    // Create a texture sampler state description.
+    // Create a clamp texture sampler state description.
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -224,47 +223,55 @@ bool ProjectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WC
     samplerDesc.MinLOD = 0;
     samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-    // Create the texture sampler state.
-    result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
+    // Create the clamp texture sampler state.
+    result = device->CreateSamplerState(&samplerDesc, &m_sampleStateClamp);
     if (FAILED(result))
     {
         return false;
     }
 
-    // Setup the description of the light position dynamic constant buffer that is in the vertex shader.
-    lightPositionBufferDesc.Usage = D3D11_USAGE_DYNAMIC; 
-    lightPositionBufferDesc.ByteWidth = sizeof(LightPositionBufferType); 
-    lightPositionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; 
-    lightPositionBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; 
-    lightPositionBufferDesc.MiscFlags = 0; 
-    lightPositionBufferDesc.StructureByteStride = 0; 
+    // Create a wrap texture sampler state description.
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0;
+    samplerDesc.BorderColor[1] = 0;
+    samplerDesc.BorderColor[2] = 0;
+    samplerDesc.BorderColor[3] = 0;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-    // Create the constant buffer pointer so we can access the vertex shader constant buffer within this class.
-    result = device->CreateBuffer(&lightPositionBufferDesc, NULL, &m_lightPositionBuffer); 
+    // Create the wrap texture sampler state.
+    result = device->CreateSamplerState(&samplerDesc, &m_sampleStateWrap);
     if (FAILED(result))
     {
-        return false; 
+        return false;
     }
 
-    // Setup the description of the light dynmaic constant buffer that is in the pixel shader.
+    // Setup the description of the light dynamic constant buffer that is in the pixel shader.
     lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    lightBufferDesc.ByteWidth = sizeof(LightBufferType); 
-    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; 
-    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; 
-    lightBufferDesc.MiscFlags = 0; 
-    lightBufferDesc.StructureByteStride = 0; 
+    lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    lightBufferDesc.MiscFlags = 0;
+    lightBufferDesc.StructureByteStride = 0;
 
     // Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
-    result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer); 
+    result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
     if (FAILED(result))
     {
         return false;
     }
 
     return true;
+
 }
 
-void ProjectionShaderClass::ShutdownShader()
+void ShadowShaderClass::ShutdownShader()
 {
     // Release the light constant buffer.
     if (m_lightBuffer)
@@ -273,18 +280,18 @@ void ProjectionShaderClass::ShutdownShader()
         m_lightBuffer = 0;
     }
 
-    // Release the light position constant buffer.
-    if (m_lightPositionBuffer)
+    // Release the wrap sampler state.
+    if (m_sampleStateWrap)
     {
-        m_lightPositionBuffer->Release();
-        m_lightPositionBuffer = 0;
+        m_sampleStateWrap->Release();
+        m_sampleStateWrap = 0;
     }
 
-    // Release the sampler state.
-    if (m_sampleState)
+    // Release the clamp sampler state.
+    if (m_sampleStateClamp)
     {
-        m_sampleState->Release();
-        m_sampleState = 0;
+        m_sampleStateClamp->Release();
+        m_sampleStateClamp = 0;
     }
 
     // Release the matrix constant buffer.
@@ -318,7 +325,7 @@ void ProjectionShaderClass::ShutdownShader()
     return;
 }
 
-void ProjectionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+void ShadowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
 {
     char* compileErrors;
     unsigned long long bufferSize, i;
@@ -353,26 +360,24 @@ void ProjectionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, H
     return;
 }
 
-bool ProjectionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
+bool ShadowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
     XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix, 
-    XMMATRIX viewMatrix2, XMMATRIX projectionMatrix2, 
-    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* projectionTexture,
-    XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor, XMFLOAT3 lightPosition, float brightness)
+    XMMATRIX lightViewMatrix, XMMATRIX lightProjectionMatrix, 
+    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, 
+    XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor, XMFLOAT3 lightDirection, float bias)
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     MatrixBufferType* dataPtr;
     unsigned int bufferNumber;
-    LightPositionBufferType* dataPtr2; 
-    LightBufferType* dataPtr3; 
+    LightBufferType* dataPtr2;
 
     // Transpose the matrices to prepare them for the shader.
     worldMatrix = XMMatrixTranspose(worldMatrix);
     viewMatrix = XMMatrixTranspose(viewMatrix);
     projectionMatrix = XMMatrixTranspose(projectionMatrix);
-
-    viewMatrix2 = XMMatrixTranspose(viewMatrix2); 
-    projectionMatrix2 = XMMatrixTranspose(projectionMatrix2); 
+    lightViewMatrix = XMMatrixTranspose(lightViewMatrix);
+    lightProjectionMatrix = XMMatrixTranspose(lightProjectionMatrix);
 
     // Lock the constant buffer so it can be written to.
     result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -388,9 +393,8 @@ bool ProjectionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceConte
     dataPtr->world = worldMatrix;
     dataPtr->view = viewMatrix;
     dataPtr->projection = projectionMatrix;
-
-    dataPtr->view2 = viewMatrix2;
-    dataPtr->projection2 = projectionMatrix2;
+    dataPtr->lightView = lightViewMatrix;
+    dataPtr->lightProjection = lightProjectionMatrix;
 
     // Unlock the constant buffer.
     deviceContext->Unmap(m_matrixBuffer, 0);
@@ -402,62 +406,39 @@ bool ProjectionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceConte
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
     // Lock the light position constant buffer so it can be written to.
-    result = deviceContext->Map(m_lightPositionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource); 
-    if (FAILED(result))
-    {
-        return false;
-    }
-
-    // Get a pointer to the data in the constant buffer.
-    dataPtr2 = (LightPositionBufferType*)mappedResource.pData; 
-
-    // Copy the lighting variables into the constant buffer.
-    dataPtr2->lightPosition = lightPosition; 
-    dataPtr2->padding = 0.f; 
-
-    // Unlock the constant buffer.
-    deviceContext->Unmap(m_lightBuffer, 0); 
-
-    // Set the position number of the light constant buffer in the vertex shader.
-    bufferNumber = 1; 
-
-    // Finally set the light constant buffer in the vertex shader with the updated values.
-    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_lightPositionBuffer); 
-
-    // Lock the light constant buffer so it can be written to.
     result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result))
     {
         return false;
     }
 
-    // Get a pointer to the data into the constant buffer.
-    dataPtr3 = (LightBufferType*)mappedResource.pData; 
+    // Get a pointer to the data in the constant buffer.
+    dataPtr2 = (LightBufferType*)mappedResource.pData;
 
     // Copy the lighting variables into the constant buffer.
-    dataPtr3->ambientColor = ambientColor; 
-    dataPtr3->diffuseColor = diffuseColor;
-    dataPtr3->brightness = brightness;
-    dataPtr3->padding = XMFLOAT3(0.f, 0.f, 0.f); 
+    dataPtr2->ambientColor = ambientColor;
+    dataPtr2->diffuseColor = diffuseColor; 
+    dataPtr2->lightDirection = lightDirection;
+    dataPtr2->bias = bias; 
+
 
     // Unlock the constant buffer.
-    deviceContext->Unmap(m_lightBuffer, 0); 
+    deviceContext->Unmap(m_lightBuffer, 0);
 
-    // Set the position of the light constant buffer in the pixel shader.
-    bufferNumber = 0; 
+    // Set the position of the light constant buffer in the vertex shader.
+    bufferNumber = 0;
 
-    // Finally set the light constant buffer in the pixel shader with the updated values.
+    // Finally set the light constant buffer in the vertex shader with the updated values.
     deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
 
     // Set shader texture resources in the pixel shader.
     deviceContext->PSSetShaderResources(0, 1, &texture);
+    deviceContext->PSSetShaderResources(1, 1, &depthMapTexture);
 
-    deviceContext->PSSetShaderResources(1, 1, &projectionTexture); 
-
-    return true; 
+    return true;
 }
 
-void ProjectionShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+void ShadowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
     // Set the vertex input layout.
     deviceContext->IASetInputLayout(m_layout);
@@ -467,9 +448,10 @@ void ProjectionShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int
     deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
     // Set the sampler state in the pixel shader.
-    deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+    deviceContext->PSSetSamplers(0, 1, &m_sampleStateClamp);
+    deviceContext->PSSetSamplers(1, 1, &m_sampleStateWrap);
 
-    // Render the triangle.
+    // Render the geometry.
     deviceContext->DrawIndexed(indexCount, 0, 0);
 
     return;
