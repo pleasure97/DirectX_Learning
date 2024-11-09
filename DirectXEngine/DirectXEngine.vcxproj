@@ -146,6 +146,7 @@
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="frustumclass.cpp" />
     <ClCompile Include="glassshaderclass.cpp" />
+    <ClCompile Include="glowshaderclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="lightmapshaderclass.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="rendertextureclass.cpp" />
     <ClCompile Include="shadermanagerclass.cpp" />
     <ClCompile Include="shadowshaderclass.cpp" />
+    <ClCompile Include="softshadowshaderclass.cpp" />
     <ClCompile Include="specmapshaderclass.cpp" />
     <ClCompile Include="spriteclass.cpp" />
     <ClCompile Include="systemclass.cpp" />
@@ -173,6 +175,7 @@
     <ClCompile Include="textureshaderclass.cpp" />
     <ClCompile Include="timerclass.cpp" />
     <ClCompile Include="translateshaderclass.cpp" />
+    <ClCompile Include="transparentdepthshaderclass.cpp" />
     <ClCompile Include="transparentshaderclass.cpp" />
     <ClCompile Include="viewpointclass.cpp" />
     <ClCompile Include="watershaderclass.cpp" />
@@ -197,6 +200,7 @@
     <ClInclude Include="fpsclass.h" />
     <ClInclude Include="frustumclass.h" />
     <ClInclude Include="glassshaderclass.h" />
+    <ClInclude Include="glowshaderclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="lightclass.h" />
     <ClInclude Include="lightmapshaderclass.h" />
@@ -215,6 +219,7 @@
     <ClInclude Include="rendertextureclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
     <ClInclude Include="shadowshaderclass.h" />
+    <ClInclude Include="softshadowshaderclass.h" />
     <ClInclude Include="specmapshaderclass.h" />
     <ClInclude Include="spriteclass.h" />
     <ClInclude Include="systemclass.h" />
@@ -223,6 +228,7 @@
     <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="timerclass.h" />
     <ClInclude Include="translateshaderclass.h" />
+    <ClInclude Include="transparentdepthshaderclass.h" />
     <ClInclude Include="transparentshaderclass.h" />
     <ClInclude Include="viewpointclass.h" />
     <ClInclude Include="watershaderclass.h" />
@@ -248,6 +254,8 @@
     <None Include="font.vs" />
     <None Include="glass.ps" />
     <None Include="glass.vs" />
+    <None Include="glow.ps" />
+    <None Include="glow.vs" />
     <None Include="light.ps" />
     <None Include="light.vs" />
     <None Include="lightmap.ps" />
@@ -266,6 +274,8 @@
     <None Include="refraction.vs" />
     <None Include="shadow.ps" />
     <None Include="shadow.vs" />
+    <None Include="softshadow.ps" />
+    <None Include="softshadow.vs" />
     <None Include="specmap.ps" />
     <None Include="specmap.vs" />
     <None Include="texture.ps" />
@@ -274,6 +284,8 @@
     <None Include="translate.vs" />
     <None Include="transparent.ps" />
     <None Include="transparent.vs" />
+    <None Include="transparentdepth.ps" />
+    <None Include="transparentdepth.vs" />
     <None Include="water.ps" />
     <None Include="water.vs" />
   </ItemGroup>

@@ -8,13 +8,14 @@ ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_CubeModel = 0;
-	m_SphereModel = 0;
-	m_GroundModel = 0;
-	m_Light = 0;
-	m_RenderTexture = 0;
-	m_DepthShader = 0;
-	m_ShadowShader = 0;
+	m_Model = 0;
+	m_Light = 0; 
+	m_LightShader = 0; 
+	m_FontShader = 0; 
+	m_Font = 0; 
+	m_TextString = 0; 
+	m_MouseBitmap = 0; 
+	m_TextureShader = 0; 
 }
 
 
@@ -31,7 +32,12 @@ ApplicationClass::~ApplicationClass()
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	char modelFilename[128], textureFilename[128];
+	char testString[32]; 
 	bool result;
+
+	// Store the screen width and height.
+	m_screenWidth = screenWidth; 
+	m_screenHeight = screenHeight; 
 
 	// Create and initialize the Direct3D object.
 	m_Direct3D = new D3DClass;
@@ -46,101 +52,82 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
-	m_Camera->SetPosition(0.f, 7.f, -10.0f);
-	m_Camera->SetRotation(35.f, 0.f, 0.f); 
+	m_Camera->SetPosition(0.f, 0.f, -10.f);
 	m_Camera->Render();
-
-	// Create and initialize the ground model object.
-	m_GroundModel = new ModelClass; 
-
-	strcpy_s(modelFilename, "../DirectXEngine/data/plane01.txt");
-	strcpy_s(textureFilename, "../DirectXEngine/data/metal001.tga");
-	
-	result = m_GroundModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename); 
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
-		return false;
-	}
+	m_Camera->RenderBaseViewMatrix(); 
 
 	// Create and initialize the cube model object.
-	m_CubeModel = new ModelClass;
-
-	strcpy_s(modelFilename, "../DirectXEngine/data/cube.txt");
-	strcpy_s(textureFilename, "../DirectXEngine/data/wall01.tga");
-
-	result = m_CubeModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the cube model object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the sphere model object.
-	m_SphereModel = new ModelClass;
+	m_Model = new ModelClass;
 
 	strcpy_s(modelFilename, "../DirectXEngine/data/sphere.txt");
-	strcpy_s(textureFilename, "../DirectXEngine/data/ice.tga");
+	strcpy_s(textureFilename, "../DirectXEngine/data/blue.tga");
 
-	result = m_SphereModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
+	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the sphere model object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the ground model object.
-	m_GroundModel = new ModelClass;
-
-	strcpy_s(modelFilename, "../Engine/data/plane01.txt");
-	strcpy_s(textureFilename, "../Engine/data/metal001.tga");
-
-	result = m_GroundModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
-		return false;
-	}
-
 	// Create and initialize the light object.
-	m_Light = new LightClass; 
+	m_Light = new LightClass;
 
-	m_Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.f); 
+	m_Light->SetDirection(0.f, 0.f, 1.f); 
 	m_Light->SetDiffuseColor(1.f, 1.f, 1.f, 1.f); 
-	m_Light->GenerateOrthoMatrix(20.f, SHADOWMAP_NEAR, SHADOWMAP_DEPTH); 
 
-	// Create and initialize the render to texture object.
-	m_RenderTexture = new RenderTextureClass; 
+	// Create and initialize the light shader object.
+	m_LightShader = new LightShaderClass;
 
-	result = m_RenderTexture->Initialize(m_Direct3D->GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SHADOWMAP_DEPTH, SHADOWMAP_NEAR, 1); 
+	result = m_LightShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the render texture object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the depth shader object.
-	m_DepthShader = new DepthShaderClass; 
+	// Create and initialize the font shader object.
+	m_FontShader = new FontShaderClass;
 
-	result = m_DepthShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
+	result = m_FontShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the depth shader object", L"Error", MB_OK); 
-		return false; 
-	}
-
-	// Create and initialize the shadow shader object.
-	m_ShadowShader = new ShadowShaderClass; 
-
-	result = m_ShadowShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the shadow shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Set the shadow map bias to fix the floating point precision issues (shadow acne / lines artifacts).
-	m_shadowMapBias = 0.0022f; 
+	// Create and initialize the text string object.
+	m_TextString = new TextClass; 
+
+	strcpy_s(testString, "Intersection: No");
+
+	result = m_TextString->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), 
+		screenWidth, screenHeight, 32, m_Font, testString, 10, 10, 0.0f, 1.0f, 0.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Create and initialize the mouse bitmap object.
+	m_MouseBitmap = new BitmapClass;
+
+	strcpy_s(textureFilename, "../DirectXEngine/data/mouse.tga");
+
+	result = m_MouseBitmap->Initilaize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(),
+		screenWidth, screenHeight, textureFilename, 50, 50); 
+	if (!result)
+	{
+		return false;
+	}
+
+	// Create and initialize the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+
+	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd); 
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
 
 	return true;
 }
@@ -148,28 +135,52 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the shadow shader object.
-	if (m_ShadowShader)
+	// Release the texture shader object.
+	if (m_TextureShader)
 	{
-		m_ShadowShader->Shutdown();
-		delete m_ShadowShader;
-		m_ShadowShader = 0;
+		m_TextureShader->Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
 	}
 
-	// Release the depth shader object.
-	if (m_DepthShader)
+	// Release the mouse bitmap object.
+	if (m_MouseBitmap)
 	{
-		m_DepthShader->Shutdown();
-		delete m_DepthShader;
-		m_DepthShader = 0;
+		m_MouseBitmap->Shutdown();
+		delete m_MouseBitmap;
+		m_MouseBitmap = 0;
 	}
 
-	// Release the render texture object.
-	if (m_RenderTexture)
+	// Release the text string object.
+	if (m_TextString)
 	{
-		m_RenderTexture->Shutdown();
-		delete m_RenderTexture;
-		m_RenderTexture = 0;
+		m_TextString->Shutdown();
+		delete m_TextString;
+		m_TextString = 0;
+	}
+
+	// Release the font object.
+	if (m_Font)
+	{
+		m_Font->Shutdown();
+		delete m_Font;
+		m_Font = 0;
+	}
+
+	// Release the font shader object.
+	if (m_FontShader)
+	{
+		m_FontShader->Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the light shader object.
+	if (m_LightShader)
+	{
+		m_LightShader->Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
 	}
 
 	// Release the light object.
@@ -179,28 +190,12 @@ void ApplicationClass::Shutdown()
 		m_Light = 0;
 	}
 
-	// Release the ground model object.
-	if (m_GroundModel)
-	{
-		m_GroundModel->Shutdown();
-		delete m_GroundModel;
-		m_GroundModel = 0;
-	}
-
-	// Release the sphere model object.
-	if (m_SphereModel)
-	{
-		m_SphereModel->Shutdown();
-		delete m_SphereModel;
-		m_SphereModel = 0;
-	}
-
 	// Release the cube model object.
-	if (m_CubeModel)
+	if (m_Model)
 	{
-		m_CubeModel->Shutdown();
-		delete m_CubeModel;
-		m_CubeModel = 0;
+		m_Model->Shutdown();
+		delete m_Model;
+		m_Model = 0;
 	}
 
 	// Release the camera object.
@@ -224,11 +219,10 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame(InputClass* Input)
 {
-	static float lightAngle = 270.f; 
-	float radians; 
-	static float lightPosX = 9.f; 
-	float frameTime; 
-	bool result;
+	char testString[32]; 
+	int mouseX, mouseY; 
+	bool result; 
+	bool intersect; 
 
 	// Check if the user pressed escape and wants to exit the application.
 	if (Input->IsEscapePressed())
@@ -236,105 +230,38 @@ bool ApplicationClass::Frame(InputClass* Input)
 		return false;
 	}
 
-	// Set the frame time manually assuming 60 fps.
-	frameTime = 10.f; 
+	// Get the location of the mouse from the input object.
+	Input->GetMouseLocation(mouseX, mouseY); 
 
-	// Update the position of the light each frame.
-	lightPosX -= 0.003f * frameTime; 
+	// Update the location of the mouse cursor on the Screen.
+	m_MouseBitmap->SetRenderLocation(mouseX, mouseY); 
 
-	// Update the angle of the light each frame.
-	lightAngle -= 0.003f * frameTime; 
-	if (lightAngle < 90.f)
+	// Check if the mouse intersects the sphere.
+	intersect = TestIntersection(mouseX, mouseY); 
+
+	// If it intersects, then update the text string message.
+	if (intersect)
 	{
-		lightAngle = 270.f; 
-
-		// Reset the light position also.
-		lightPosX = 9.f; 
+		strcpy_s(testString, "Intersection : Yes"); 
 	}
-	radians = lightAngle * 0.0174532925f;
-
-	// Update the direction of the light.
-	m_Light->SetDirection(sinf(radians), cosf(radians), 0.f); 
-
-	// Set the position and lookat for the light.
-	m_Light->SetPosition(lightPosX, 8.f, -0.1f); 
-	m_Light->SetLookAt(-lightPosX, 0.f, 0.f); 
-	m_Light->GenerateViewMatrix(); 
-
-	// Render the scene depth to the render texture.
-	result = RenderDepthToTexture(); 
-	if (!result)
+	else
 	{
-		return false; 
+		strcpy_s(testString, "Intersection : No"); 
 	}
 
-	// Render the graphics scene.
-	result = Render();
+	// Update the text string. 
+	result = m_TextString->UpdateText(m_Direct3D->GetDeviceContext(), m_Font, testString, 10, 10, 0.f, 1.f, 0.f); 
 	if (!result)
 	{
 		return false;
 	}
 
-	return true;
-}
-
-
-bool ApplicationClass::RenderDepthToTexture()
-{
-	XMMATRIX translateMatrix; 
-	XMMATRIX lightViewMatrix;
-	XMMATRIX lightOrthoMatrix;
-	bool result;
-
-	// Set the render target to be the render texture. 
-	// Also clear the render to texture. 
-	m_RenderTexture->SetRenderTarget(m_Direct3D->GetDeviceContext()); 
-	m_RenderTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.f, 0.f, 0.f, 1.f); 
-
-	// Get the view and orthographic matrices from the light object.
-	m_Light->GetViewMatrix(lightViewMatrix); 
-	m_Light->GetOrthoMatrix(lightOrthoMatrix); 
-
-	// Setup the translation matrix for the cube model.
-	translateMatrix = XMMatrixTranslation(-2.f, 2.f, 0.f); 
-
-	// Render the cube model using the depth shader.
-	m_CubeModel->Render(m_Direct3D->GetDeviceContext()); 
-
-	result = m_DepthShader->Render(m_Direct3D->GetDeviceContext(), m_CubeModel->GetIndexCount(), translateMatrix, lightViewMatrix, lightOrthoMatrix); 
+	// Render the final graphics scene.
+	result = Render(); 
 	if (!result)
 	{
 		return false;
 	}
-
-	// Setup the translation matrix for the sphere model.
-	translateMatrix = XMMatrixTranslation(2.f, 2.f, 0.f); 
-
-	// Render the sphere model using the depth shader.
-	m_SphereModel->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_DepthShader->Render(m_Direct3D->GetDeviceContext(), m_SphereModel->GetIndexCount(), translateMatrix, lightViewMatrix, lightOrthoMatrix); 
-	if (!result)
-	{
-		return false;
-	}
-
-	// Setup the translation matrix for the ground model.
-	translateMatrix = XMMatrixTranslation(0.f, 1.f, 0.f); 
-
-	// Render the ground model using the depth shader.
-	m_GroundModel->Render(m_Direct3D->GetDeviceContext()); 
-
-	result = m_DepthShader->Render(m_Direct3D->GetDeviceContext(), m_GroundModel->GetIndexCount(), translateMatrix, lightViewMatrix, lightOrthoMatrix); 
-	if (!result)
-	{
-		return false;
-	}
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	// Also reset the viewport back to the original.
-	m_Direct3D->SetBackBufferRenderTarget(); 
-	m_Direct3D->ResetViewport(); 
 
 	return true; 
 }
@@ -342,71 +269,149 @@ bool ApplicationClass::RenderDepthToTexture()
 bool ApplicationClass::Render()
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-	XMMATRIX lightViewMatrix, lightOrthoMatrix; 
+	XMMATRIX baseViewMatrix, orthoMatrix, translateMatrix; 
 	bool result;
 
 	// Clear the buffers to begin the scene.
-	m_Direct3D->BeginScene(0.f, 0.f, 0.f, 1.f); 
+	m_Direct3D->BeginScene(0.f, 0.5f, 0.8f, 1.f); 
 
-	// Get the world, view, and projection matrices from the camera and d3d objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix); 
-	m_Camera->GetViewMatrix(viewMatrix); 
-	m_Direct3D->GetProjectionMatrix(projectionMatrix); 
+	// Get the matrices from the camera and d3d objects.
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetProjectionMatrix(projectionMatrix);
+	m_Camera->GetBaseViewMatrix(baseViewMatrix);
+	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
-	// Get the view and projection matrices from the first light.
-	m_Light->GetViewMatrix(lightViewMatrix); 
-	m_Light->GetOrthoMatrix(lightOrthoMatrix); 
+	// Translate to the location of the sphere.
+	translateMatrix = XMMatrixTranslation(-5.0f, 1.0f, 5.0f);
 
-	// Setup the translation matrix for the cube model.
-	worldMatrix = XMMatrixTranslation(-2.f, 2.f, 0.f); 
+	// Render the full screen window using the glow shader.
+	m_Model->Render(m_Direct3D->GetDeviceContext());
 
-	// Render the cube model using the shadow shader.
-	m_CubeModel->Render(m_Direct3D->GetDeviceContext()); 
-
-	result = m_ShadowShader->Render(m_Direct3D->GetDeviceContext(), m_CubeModel->GetIndexCount(),
-		worldMatrix, viewMatrix, projectionMatrix,
-		lightViewMatrix, lightOrthoMatrix,
-		m_CubeModel->GetTexture(), m_RenderTexture->GetShaderResourceView(),
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetPosition(), m_shadowMapBias); 
+	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), 
+		translateMatrix, viewMatrix, projectionMatrix,
+		m_Model->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor());
 	if (!result)
 	{
 		return false;
 	}
 
-	// Setup the translation matrix for the sphere model.
-	worldMatrix = XMMatrixTranslation(2.0f, 2.0f, 0.0f);
+	// Disable the Z buffer and enable alpha blending for 2D blending.
+	m_Direct3D->TurnZBufferOff(); 
+	m_Direct3D->EnableAlphaBlending(); 
 
-	// Render the sphere model using the shadow shader.
-	m_SphereModel->Render(m_Direct3D->GetDeviceContext());
+	// Render the text string using the font shader.
+	m_TextString->Render(m_Direct3D->GetDeviceContext()); 
 
-	result = m_ShadowShader->Render(m_Direct3D->GetDeviceContext(), m_SphereModel->GetIndexCount(), 
-		worldMatrix, viewMatrix, projectionMatrix, 
-		lightViewMatrix, lightOrthoMatrix,
-		m_SphereModel->GetTexture(), m_RenderTexture->GetShaderResourceView(), 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetPosition(), m_shadowMapBias);
+	result = m_FontShader->Render(m_Direct3D->GetDeviceContext(), m_TextString->GetIndexCount(),
+		worldMatrix, viewMatrix, baseViewMatrix, orthoMatrix,
+		m_Font->GetTexture(), m_TextString->GetPixelColor()); 
+	if (!result)
+	{
+		retrun false;
+	}
+
+	// Render the mouse cursor using the texture shader.
+	result = m_MouseBitmap->Render(m_Direct3D->GetDeviceContext()); 
+	if (!result)
+	{
+		return false; 
+	}
+
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_MouseBitmap->GetIndexCount(),
+		worldMatrix, baseViewMatrix, orthoMatrix,
+		m_MouseBitmap->GetTexture()); 
 	if (!result)
 	{
 		return false;
 	}
 
-	// Setup the translation matrix for the ground model.
-	worldMatrix = XMMatrixTranslation(0.0f, 1.0f, 0.0f);
-
-	// Render the ground model using the shadow shader.
-	m_GroundModel->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_ShadowShader->Render(m_Direct3D->GetDeviceContext(), m_GroundModel->GetIndexCount(), 
-		worldMatrix, viewMatrix, projectionMatrix, 
-		lightViewMatrix, lightOrthoMatrix,
-		m_GroundModel->GetTexture(), m_RenderTexture->GetShaderResourceView(), 
-		m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Light->GetPosition(), m_shadowMapBias);
-	if (!result)
-	{
-		return false;
-	}
+	// Enable the Z buffer and disable alpha blending now that 2D rendering is complete.
+	m_Direct3D->TurnZBufferOn(); 
+	m_Direct3D->DisableAlphaBlending(); 
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene(); 
+
+	return true; 
+}
+
+bool ApplicationClass::TestIntersection(int mouseX, int mouseY)
+{
+	XMMATRIX projectionMatrix, viewMatrix, inverseViewMatrix, worldMatrix, inverseWorldMatrix; 
+	XMFLOAT4X4 pMatrix, iViewMatrix; 
+	XMVECTOR direction, origin; 
+	XMVECTOR rayDirection, rayOrigin;
+	XMFLOAT3 cameraDirection, cameraOrigin; 
+	XMFLOAT3 rayOri, rayDir;
+	float pointX, pointY; 
+	bool intersect; 
+
+	// Move the mouse cursor coordinates into the -1 to +1 range.
+	pointX = ((2.f * (float)mouseX) / (float)m_screenWidth) - 1.f; 
+	pointY = (((2.f * (float)mouseY) / (float)m_screenHeight) - 1.f) * -1.f;
+
+	// Adjust the points using the projection matrix to account for the aspect ratio of the viewport.
+	m_Direct3D->GetProjectionMatrix(projectionMatrix); 
+	XMStoreFloat4x4(&pMatrix, projectionMatrix); 
+	pointX /= pMatrix._11; 
+	pointY /= pMatrix._22; 
+
+	// Get the inverse of the view matrix.
+	m_Camera->GetViewMatrix(viewMatrix); 
+	inverseViewMatrix = XMMatrixInverse(NULL, viewMatrix); 
+	XMStoreFloat4x4(&iViewMatrix, inverseViewMatrix); 
+
+	// Calculate the direction of the picking ray in view space.
+	cameraDirection.x = (pointX * iViewMatrix._11) + (pointY * iViewMatrix._21) + iViewMatrix._31; 
+	cameraDirection.y = (pointX * iViewMatrix._12) + (pointY * iViewMatrix._22) + iViewMatrix._32; 
+	cameraDirection.z = (pointX * iViewMatrix._13) + (pointY * iViewMatrix._32) + iViewMatrix._33; 
+	direction = XMLoadFloat3(&cameraDirection); 
+
+	// Get the origin of the picking ray which is the position of the camera.
+	cameraOrigin = m_Camera->GetPosition();
+	origin = XMLoadFloat3(&cameraOrigin); 
+
+	// Get the world matrix and translate to the location of the sphere.
+	worldMatrix = XMMatrixTranslation(-5.f, 1.f, 5.f); 
+
+	// Now get the inverse of the translated world matrix.
+	inverseWorldMatrix = XMMatrixInverse(NULL, worldMatrix); 
+
+	// Now transform the ray origin and the ray direction from view space to world space.
+	rayOrigin = XMVector3TransformCoord(origin, inverseWorldMatrix); 
+	rayDirection = XMVector3TransformNormal(direction, inverseWorldMatrix); 
+
+	// Normalize the ray direction. 
+	rayDirection = XMVector3Normalize(rayDirection); 
+
+	// Convert the ray origin and direction XMVECTOR to a XMFLOAT3 type.
+	XMStoreFloat3(&rayOri, rayOrigin);
+	XMStoreFloat3(&rayDir, rayDirection); 
+
+	// Now perform the ray-sphere intersection test.
+	intersect = RaySphereIntersect(rayOri, rayDir, 1.f); 
+
+	return intersect; 
+}
+
+bool ApplicationClass::RaySphereIntersect(XMFLOAT3 rayOrigin, XMFLOAT3 rayDirection, float radius)
+{
+	float a, b, c, discriminant;
+
+	// Calculate the a, b, and c coefficients.
+	a = (rayDirection.x * rayDirection.x) + (rayDirection.y * rayDirection.y) + (rayDirection.z * rayDirection.z); 
+	b = ((rayDirection.x * rayOrigin.x) + (rayDirection.y * rayOrigin.y) + (rayDirection.z * rayOrigin.z)) * 2.f; 
+	c = ((rayOrigin.x * rayOrigin.x) + (rayOrigin.y * rayOrigin.y) + (rayOrigin.z * rayOrigin.z)) - (radius * radius); 
+
+	// Find the discriminant.
+	discriminant = (b * b) - (4 * a * c); 
+
+	// If the discriminant is negative, the picking ray missed sphere, otherwise, it intersected the sphere.
+	if (discriminant < 0.f)
+	{
+		return false; 
+	}
 
 	return true; 
 }

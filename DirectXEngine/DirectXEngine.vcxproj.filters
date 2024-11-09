@@ -165,6 +165,15 @@
     <ClCompile Include="shadowshaderclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="softshadowshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="transparentdepthshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="glowshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -311,6 +320,15 @@
     <ClInclude Include="shadowshaderclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="softshadowshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="transparentdepthshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="glowshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="color.vs">
@@ -455,6 +473,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shadow.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="softshadow.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="softshadow.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="transparentdepth.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="transparentdepth.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="glow.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="glow.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
