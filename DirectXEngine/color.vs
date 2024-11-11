@@ -14,27 +14,22 @@ struct VertexInputType
 	float4 color : COLOR; 
 };
 
-struct PixelInputType
+struct HullInputType
 {
-	float4 position : SV_POSITION; 
+	float3 position : POSITION; 
 	float4 color : COLOR; 
 };
 
 // VERTEX SHADER // 
 
-PixelInputType ColorVertexShader(VertexInputType input)
+HullInputType ColorVertexShader(VertexInputType input)
 {
-	PixelInputType output; 
+	HullInputType output; 
 
-	// Change the position vector to be 4 units for proper matrix calculations. 
-	input.position.w = 1.f; 
+	// Pass the vertex position into the hull shader.
+	output.position = input.position;
 
-	// Calculate the position of the vertex against the world, view, and projection matrices. 
-	output.position = mul(input.position, worldMatrix); 
-	output.position = mul(output.position, viewMatrix); 
-	output.position = mul(output.position, projectionMatrix); 
-
-	// Store the input color for the pixel shaders to use. 
+	// Store the input color into the hull shader.
 	output.color = input.color; 
 
 	return output; 

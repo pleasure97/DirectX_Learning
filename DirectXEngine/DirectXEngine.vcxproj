@@ -136,6 +136,8 @@
     <ClCompile Include="clipplaneshaderclass.cpp" />
     <ClCompile Include="colorshaderclass.cpp" />
     <ClCompile Include="d3dclass.cpp" />
+    <ClCompile Include="deferredbuffersclass.cpp" />
+    <ClCompile Include="deferredshaderclass.cpp" />
     <ClCompile Include="depthshaderclass.cpp" />
     <ClCompile Include="displayplaneclass.cpp" />
     <ClCompile Include="fadeshaderclass.cpp" />
@@ -145,6 +147,7 @@
     <ClCompile Include="fontshaderclass.cpp" />
     <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="frustumclass.cpp" />
+    <ClCompile Include="gbuffershaderclass.cpp" />
     <ClCompile Include="glassshaderclass.cpp" />
     <ClCompile Include="glowshaderclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
@@ -169,6 +172,8 @@
     <ClCompile Include="softshadowshaderclass.cpp" />
     <ClCompile Include="specmapshaderclass.cpp" />
     <ClCompile Include="spriteclass.cpp" />
+    <ClCompile Include="ssaoblurshaderclass.cpp" />
+    <ClCompile Include="ssaoshaderclass.cpp" />
     <ClCompile Include="systemclass.cpp" />
     <ClCompile Include="textclass.cpp" />
     <ClCompile Include="textureclass.cpp" />
@@ -190,6 +195,8 @@
     <ClInclude Include="clipplaneshaderclass.h" />
     <ClInclude Include="colorshaderclass.h" />
     <ClInclude Include="d3dclass.h" />
+    <ClInclude Include="deferredbuffersclass.h" />
+    <ClInclude Include="deferredshaderclass.h" />
     <ClInclude Include="depthshaderclass.h" />
     <ClInclude Include="displayplaneclass.h" />
     <ClInclude Include="fadeshaderclass.h" />
@@ -199,6 +206,7 @@
     <ClInclude Include="fontshaderclass.h" />
     <ClInclude Include="fpsclass.h" />
     <ClInclude Include="frustumclass.h" />
+    <ClInclude Include="gbuffershaderclass.h" />
     <ClInclude Include="glassshaderclass.h" />
     <ClInclude Include="glowshaderclass.h" />
     <ClInclude Include="inputclass.h" />
@@ -222,6 +230,8 @@
     <ClInclude Include="softshadowshaderclass.h" />
     <ClInclude Include="specmapshaderclass.h" />
     <ClInclude Include="spriteclass.h" />
+    <ClInclude Include="ssaoblurshaderclass.h" />
+    <ClInclude Include="ssaoshaderclass.h" />
     <ClInclude Include="systemclass.h" />
     <ClInclude Include="textclass.h" />
     <ClInclude Include="textureclass.h" />
@@ -240,8 +250,12 @@
     <None Include="blur.vs" />
     <None Include="clipplane.ps" />
     <None Include="clipplane.vs" />
+    <None Include="color.ds" />
+    <None Include="color.hs" />
     <None Include="color.ps" />
     <None Include="color.vs" />
+    <None Include="deferred.ps" />
+    <None Include="deferred.vs" />
     <None Include="depth.ps" />
     <None Include="depth.vs" />
     <None Include="fade.ps" />
@@ -252,6 +266,8 @@
     <None Include="fog.vs" />
     <None Include="font.ps" />
     <None Include="font.vs" />
+    <None Include="gbuffer.ps" />
+    <None Include="gbuffer.vs" />
     <None Include="glass.ps" />
     <None Include="glass.vs" />
     <None Include="glow.ps" />
@@ -278,6 +294,10 @@
     <None Include="softshadow.vs" />
     <None Include="specmap.ps" />
     <None Include="specmap.vs" />
+    <None Include="ssao.ps" />
+    <None Include="ssao.vs" />
+    <None Include="ssaoblur.ps" />
+    <None Include="ssaoblur.vs" />
     <None Include="texture.ps" />
     <None Include="texture.vs" />
     <None Include="translate.ps" />

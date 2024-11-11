@@ -31,14 +31,11 @@ private:
 	{
 		XMFLOAT3 position;
 		XMFLOAT2 texture;
-		XMFLOAT3 normal;
 	};
 
-	struct ModelType
+	struct InstanceType
 	{
-		float x, y, z;
-		float tu, tv;
-		float nx, ny, nz;
+		XMFLOAT3 position; 
 	};
 
 public:
@@ -50,20 +47,25 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
-	int GetIndexCount();
+	int GetVertexCount();
+	int GetInstanceCount(); 
+
+	ID3D11ShaderResourceView* GetTexture(); 
 
 private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 
-	bool LoadModel(char*);
-	void ReleaseModel();
+	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, char*); 
+	void ReleaseTexture(); 
 
 private:
-	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-	int m_vertexCount, m_indexCount;
-	ModelType* m_model;
+	ID3D11Buffer* m_vertexBuffer;
+	ID3D11Buffer* m_instanceBuffer;
+	int m_vertexCount;
+	int m_instanceCount; 
+	TextureClass* m_Texture;
 };
 
 #endif

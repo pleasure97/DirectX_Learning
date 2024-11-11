@@ -1,16 +1,11 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: light.vs
-////////////////////////////////////////////////////////////////////////////////
-
-
 /////////////
 // GLOBALS //
 /////////////
 cbuffer MatrixBuffer
 {
-	matrix worldMatrix;
-	matrix viewMatrix;
-	matrix projectionMatrix;
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
 };
 
 
@@ -33,21 +28,21 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 // Vertex Shader
 ////////////////////////////////////////////////////////////////////////////////
-PixelInputType LightVertexShader(VertexInputType input)
+PixelInputType SsaoBlurVertexShader(VertexInputType input)
 {
     PixelInputType output;
     
 
-	// Change the position vector to be 4 units for proper matrix calculations.
+    // Change the position vector to be 4 units for proper matrix calculations.
     input.position.w = 1.0f;
 
-	// Calculate the position of the vertex against the world, view, and projection matrices.
+    // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     
-	// Store the texture coordinates for the pixel shader.
-	output.tex = input.tex;
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
     
     return output;
 }
