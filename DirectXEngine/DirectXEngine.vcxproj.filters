@@ -189,6 +189,21 @@
     <ClCompile Include="ssaoblurshaderclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="pbrshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="heatshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="heatclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="scrollshaderclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="parallaxscrollclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -357,6 +372,21 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="ssaoblurshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pbrshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="heatshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="heatclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="scrollshaderclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="parallaxscrollclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -551,6 +581,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="ssaoblur.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="pbr.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="pbr.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="heat.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="heat.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="scroll.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="scroll.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

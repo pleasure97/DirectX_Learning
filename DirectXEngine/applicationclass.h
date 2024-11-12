@@ -10,17 +10,11 @@
 ///////////////////////
 #include "d3dclass.h"
 #include "inputclass.h"
+#include "timerclass.h"
 #include "cameraclass.h"
-#include "lightclass.h"
-#include "modelclass.h"
-#include "deferredbuffersclass.h"
-#include "gbuffershaderclass.h"
-#include "rendertextureclass.h"
 #include "orthowindowclass.h"
-#include "ssaoshaderclass.h"
-#include "ssaoblurshaderclass.h"
-#include "lightshaderclass.h"
-
+#include "parallaxscrollclass.h"
+#include "scrollshaderclass.h"
 
 /////////////
 // GLOBALS //
@@ -45,28 +39,14 @@ public:
 	bool Frame(InputClass*);
 
 private:
-	bool RenderGBuffer(); 
-	bool RenderSsao(); 
-	bool BlurSsaoTexture(); 
 	bool Render(); 
 private:
 	D3DClass* m_Direct3D; 
+	TimerClass* m_Timer; 
 	CameraClass* m_Camera; 
-	LightClass* m_Light; 
-	ModelClass* m_SphereModel;
-	ModelClass* m_GroundModel; 
-	DeferredBuffersClass* m_DeferredBuffers;
-	GBufferShaderClass* m_GBufferShader; 
-	RenderTextureClass* m_SsaoRenderTexture;
-	OrthoWindowClass* m_FullScreenWindow; 
-	SsaoShaderClass* m_SsaoShader;
-	TextureClass* m_RandomTexture;
-	RenderTextureClass* m_BlurSsaoRenderTexture;
-	SsaoBlurShaderClass* m_SsaoBlurShader;
-	LightShaderClass* m_LightShader;
-	int m_screenWidth;
-	int m_screenHeight; 
-
+	OrthoWindowClass* m_FullScreenWindow;
+	ScrollShaderClass* m_ScrollShader;
+	ParallaxScrollClass* m_ParallaxForest;
 };
 
 #endif

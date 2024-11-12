@@ -7,26 +7,16 @@
 ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
+	m_Timer = 0;
 	m_Camera = 0;
-	m_Light = 0;
-	m_SphereModel = 0; 
-	m_GroundModel = 0;
-	m_DeferredBuffers = 0; 
-	m_GBufferShader = 0; 
-	m_SsaoRenderTexture = 0; 
-	m_FullScreenWindow = 0; 
-	m_SsaoShader = 0; 
-	m_RandomTexture = 0; 
-	m_BlurSsaoRenderTexture = 0; 
-	m_SsaoBlurShader = 0; 
-	m_LightShader = 0; 
+	m_FullScreenWindow = 0;
+	m_ParallaxForest = 0;
+	m_ScrollShader = 0;
 }
-
 
 ApplicationClass::ApplicationClass(const ApplicationClass& other)
 {
 }
-
 
 ApplicationClass::~ApplicationClass()
 {
@@ -35,13 +25,8 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
-	char modelFilename[128]; 
-	char textureFilename[128];
+	char configFilename[256]; 
 	bool result;
-
-	// Store the screen width and height.
-	m_screenWidth = screenWidth;
-	m_screenHeight = screenHeight;
 
 	// Create and initialize the Direct3D object.
 	m_Direct3D = new D3DClass;
@@ -53,47 +38,23 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
+	// Create and initialize the timer object.
+	m_Timer = new TimerClass;
+
+	result = m_Timer->Initialize();
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
 	m_Camera->SetPosition(0.f, 0.f, -10.f);
+	m_Camera->Render(); 
 	m_Camera->RenderBaseViewMatrix(); 
 
-	m_Camera->SetPosition(0.f, 7.f, -10.f); 
-	m_Camera->SetRotation(35.f, 0.f, 0.f); 
-	m_Camera->Render(); 
-
-	// Create and initialize the light object.
-	m_Light = new LightClass;
-
-	m_Light->SetDiffuseColor(1.f, 1.f, 1.f, 1.f); 
-	m_Light->SetDirection(1.f, -0.5f, 1.f); 
-	
-	// Create and initialize the sphere model object.
-	m_SphereModel = new ModelClass;
-
-	strcpy_s(modelFilename, "../DirectXEngine/data/sphere.txt");
-	strcpy_s(textureFilename, "../DirectXEngine/data/ice.tga");
-
-	result = m_SphereModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the sphere model object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the ground model object.
-	m_GroundModel = new ModelClass;
-
-	strcpy_s(modelFilename, "../DirectXEngine/data/plane01.txt");
-	strcpy_s(textureFilename, "../DirectXEngine/data/metal001.tga");
-
-	result = m_GroundModel->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
-		return false;
-	}
 	// Create and initialize the full screen ortho window object.
 	m_FullScreenWindow = new OrthoWindowClass;
 
@@ -104,95 +65,26 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	// Create and initialize the deferred buffers object.
-	m_DeferredBuffers = new DeferredBuffersClass;
+	// Create and initialize the parallax scroll forest object.
+	m_ParallaxForest = new ParallaxScrollClass;
 
-	result = m_DeferredBuffers->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR); 
+	// Set the filename of the config file.
+	strcpy_s(configFilename, "../DirectXEngine/data/config.txt");
+
+	result = m_ParallaxForest->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), configFilename);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the deferred buffers object.", L"Error", MB_OK);
-		return false;
-	}
-	
-	// Create and initialize the gbuffer shader object.
-	m_GBufferShader = new GBufferShaderClass;
-
-	result = m_GBufferShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the gbuffer shader object.", L"Error", MB_OK);
-		return false;
-	}
-	
-	// Create the ssao render to texture object.
-	m_SsaoRenderTexture = new RenderTextureClass;
-
-	result = m_SsaoRenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR, 2);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ssao render texture object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the parallax scroll object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the blur ssao render to texture object.
-	m_BlurSsaoRenderTexture = new RenderTextureClass;
+	// Create and initialize the scroll shader object.
+	m_ScrollShader = new ScrollShaderClass;
 
-	result = m_BlurSsaoRenderTexture->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR, 2);
+	result = m_ScrollShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the blur ssao render texture object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the full screen ortho window object.
-	m_FullScreenWindow = new OrthoWindowClass;
-
-	result = m_FullScreenWindow->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the ssao shader object.
-	m_SsaoShader = new SsaoShaderClass;
-
-	result = m_SsaoShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ssao shader object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the random texture object.
-	m_RandomTexture = new TextureClass;
-
-	strcpy_s(textureFilename, "../Engine/data/random_vec.tga");
-
-	result = m_RandomTexture->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the random texture object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create the ssao blur shader object.
-	m_SsaoBlurShader = new SsaoBlurShaderClass;
-
-	result = m_SsaoBlurShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the ssao blur shader object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create the deferred ssao light shader object.
-	m_LightShader = new LightShaderClass;
-
-	result = m_LightShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the scroll shader object.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -202,36 +94,20 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the deferred ssao light shader object.
-	if (m_LightShader)
+	// Release the scroll shader object.
+	if (m_ScrollShader)
 	{
-		m_LightShader->Shutdown();
-		delete m_LightShader;
-		m_LightShader = 0;
+		m_ScrollShader->Shutdown();
+		delete m_ScrollShader;
+		m_ScrollShader = 0;
 	}
 
-	// Release the ssao blur shader object.
-	if (m_SsaoBlurShader)
+	// Release the parallax scroll forest object.
+	if (m_ParallaxForest)
 	{
-		m_SsaoBlurShader->Shutdown();
-		delete m_SsaoBlurShader;
-		m_SsaoBlurShader = 0;
-	}
-
-	// Release the random texture object.
-	if (m_RandomTexture)
-	{
-		m_RandomTexture->Shutdown();
-		delete m_RandomTexture;
-		m_RandomTexture = 0;
-	}
-
-	// Release the ssao shader object.
-	if (m_SsaoShader)
-	{
-		m_SsaoShader->Shutdown();
-		delete m_SsaoShader;
-		m_SsaoShader = 0;
+		m_ParallaxForest->Shutdown();
+		delete m_ParallaxForest;
+		m_ParallaxForest = 0;
 	}
 
 	// Release the full screen ortho window object.
@@ -242,66 +118,18 @@ void ApplicationClass::Shutdown()
 		m_FullScreenWindow = 0;
 	}
 
-	// Release the blur ssao render to texture object.
-	if (m_BlurSsaoRenderTexture)
-	{
-		m_BlurSsaoRenderTexture->Shutdown();
-		delete m_BlurSsaoRenderTexture;
-		m_BlurSsaoRenderTexture = 0;
-	}
-
-	// Release the ssao render to texture object.
-	if (m_SsaoRenderTexture)
-	{
-		m_SsaoRenderTexture->Shutdown();
-		delete m_SsaoRenderTexture;
-		m_SsaoRenderTexture = 0;
-	}
-
-	// Release the gbuffer shader object.
-	if (m_GBufferShader)
-	{
-		m_GBufferShader->Shutdown();
-		delete m_GBufferShader;
-		m_GBufferShader = 0;
-	}
-
-	// Release the deferred buffers object.
-	if (m_DeferredBuffers)
-	{
-		m_DeferredBuffers->Shutdown();
-		delete m_DeferredBuffers;
-		m_DeferredBuffers = 0;
-	}
-
-	// Release the ground model object.
-	if (m_GroundModel)
-	{
-		m_GroundModel->Shutdown();
-		delete m_GroundModel;
-		m_GroundModel = 0;
-	}
-
-	// Release the sphere model object.
-	if (m_SphereModel)
-	{
-		m_SphereModel->Shutdown();
-		delete m_SphereModel;
-		m_SphereModel = 0;
-	}
-
-	// Release the light object.
-	if (m_Light)
-	{
-		delete m_Light;
-		m_Light = 0;
-	}
-
 	// Release the camera object.
 	if (m_Camera)
 	{
 		delete m_Camera;
 		m_Camera = 0;
+	}
+
+	// Release the timer object.
+	if (m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
 	}
 
 	// Release the Direct3D object.
@@ -318,250 +146,76 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame(InputClass* Input)
 {
-	bool result; 
-
-	// Check if the user pressed escape and wants to exit the application.
-	if (Input->IsEscapePressed())
-	{
-		return false;
-	}
-
-	// Render the scene data to the G buffer to setup deferred rendering.
-	result = RenderGBuffer();
-	if (!result)
-	{
-		return false;
-	}
-
-	// Render the screen space ambient occlusion of the scene to a render texture.
-	result = RenderSsao();
-	if (!result)
-	{
-		return false;
-	}
-
-	// Blur the ssao render texture.
-	result = BlurSsaoTexture();
-	if (!result)
-	{
-		return false;
-	}
-
-	// Render the final graphics scene.
-	result = Render();
-	if (!result)
-	{
-		return false;
-	}
-
-	return true; 
-}
-
-bool ApplicationClass::RenderGBuffer()
-{
-	XMMATRIX translateMatrix;
-	XMMATRIX viewMatrix;
-	XMMATRIX projectionMatrix; 
-
-	bool result; 
-
-	// Get the matrices from the camera and d3d objects.
-	m_Camera->GetViewMatrix(viewMatrix); 
-	m_Direct3D->GetProjectionMatrix(projectionMatrix); 
-
-	// Set the render buffers to be the render target.
-	m_DeferredBuffers->SetRenderTargets(m_Direct3D->GetDeviceContext()); 
-	m_DeferredBuffers->ClearRenderTargets(m_Direct3D->GetDeviceContext(), 0.f, 0.f, 0.f, 0.f); 
-
-	// Setup the translation matrix for the sphere model.
-	translateMatrix = XMMatrixTranslation(2.f, 2.f, 0.f); 
-
-	// Render the sphere model using the gbuffer shader.
-	m_SphereModel->Render(m_Direct3D->GetDeviceContext()); 
-
-	result = m_GBufferShader->Render(m_Direct3D->GetDeviceContext(), m_SphereModel->GetIndexCount(), 
-		translateMatrix, viewMatrix, projectionMatrix, 
-		m_SphereModel->GetTexture());
-	if (!result)
-	{
-		return false;
-	}
-
-	// Setup the translation matrix for the ground model.
-	translateMatrix = XMMatrixTranslation(0.0f, 1.0f, 0.0f);
-
-	// Render the ground model using the gbuffer shader.
-	m_GroundModel->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_GBufferShader->Render(m_Direct3D->GetDeviceContext(), m_GroundModel->GetIndexCount(), 
-		translateMatrix, viewMatrix, projectionMatrix,
-		m_GroundModel->GetTexture());
-	if (!result)
-	{
-		return false;
-	}
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.  Also reset the viewport back to the original.
-	m_Direct3D->SetBackBufferRenderTarget();
-	m_Direct3D->ResetViewport();
-
-	return true;
-}
-
-bool ApplicationClass::RenderSsao()
-{
-	XMMATRIX worldMatrix; 
-	XMMATRIX baseViewMatrix;
-	XMMATRIX orthoMatrix;
-
-	float sampleRadius;
-	float ssaoScale, ssaoBias, ssaoIntensity, randomTextureSize;
-	float screenWidth, screenHeight; 
+	float frameTime; 
 	bool result;
 
-	// Set the sample radius for the ssao shader.
-	sampleRadius = 1.f; 
-	ssaoScale = 1.f; 
-	ssaoBias = 0.1f; 
-	ssaoIntensity = 2.f; 
+	// Check if the escape key has been pressed, if so, quit.
+	if (Input->IsEscapePressed() == true)
+	{
+		return false; 
+	}
 
-	// Set the random texture width in float for the ssao shader.
-	randomTextureSize = 64.f; 
+	// Update the system stats.
+	m_Timer->Frame();
+	frameTime = m_Timer->GetTime();
 
-	// Convert the screen size to float for the shader.
-	screenWidth = (float)m_screenWidth; 
-	screenHeight = (float)m_screenHeight;  
+	// Do the frame processing for the parallax scroll forest object. 
+	m_ParallaxForest->Frame(frameTime); 
 
-	// Get the matrices from the camera and d3d objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetBaseViewMatrix(baseViewMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-
-	// Set the render target to be the ssao texture.
-	m_SsaoRenderTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
-	m_SsaoRenderTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// Begin 2D rendering.
-	m_Direct3D->TurnZBufferOff();
-
-	// Render the ssao effect to a 2D full screen window.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_SsaoShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), 
-		worldMatrix, baseViewMatrix, orthoMatrix, 
-		m_DeferredBuffers->GetShaderResourcePositions(),m_DeferredBuffers->GetShaderResourceNormals(), m_RandomTexture->GetTexture(), 
-		screenWidth, screenHeight, 
-		randomTextureSize, sampleRadius, 
-		ssaoScale, ssaoBias, ssaoIntensity);
+	// Render the final graphics pipeline.
+	result = Render(); 
 	if (!result)
 	{
 		return false;
 	}
-
-	// End 2D rendering.
-	m_Direct3D->TurnZBufferOn();
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.  Also reset the viewport back to the original.
-	m_Direct3D->SetBackBufferRenderTarget();
-	m_Direct3D->ResetViewport();
-
-	return true;
-}
-
-bool ApplicationClass::BlurSsaoTexture()
-{
-	XMMATRIX worldMatrix; 
-	XMMATRIX baseViewMatrix;
-	XMMATRIX orthoMatrix; 
-
-	bool result;
-
-	// Get the matrices from the camera and d3d objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetBaseViewMatrix(baseViewMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-
-	// Begin 2D rendering.
-	m_Direct3D->TurnZBufferOff();
-
-	// Set the blur render texture as the render target, and clear it.
-	m_BlurSsaoRenderTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
-	m_BlurSsaoRenderTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Perform a horizontal blur of the ssao texture.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_SsaoBlurShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), 
-		worldMatrix, baseViewMatrix, orthoMatrix, 
-		m_SsaoRenderTexture->GetShaderResourceView(),m_DeferredBuffers->GetShaderResourceNormals(), 
-		m_screenWidth, m_screenHeight, 0);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Set the original ssao render texture as the render target, and clear it.
-	m_SsaoRenderTexture->SetRenderTarget(m_Direct3D->GetDeviceContext());
-	m_SsaoRenderTexture->ClearRenderTarget(m_Direct3D->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Now perform a vertical blur of the ssao texture that was already horizontally blurred.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext());
-
-	result = m_SsaoBlurShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(), 
-		worldMatrix, baseViewMatrix, orthoMatrix, 
-		m_BlurSsaoRenderTexture->GetShaderResourceView(),m_DeferredBuffers->GetShaderResourceNormals(), 
-		m_screenWidth, m_screenHeight, 1);
-	if (!result)
-	{
-		return false;
-	}
-
-	// End 2D rendering.
-	m_Direct3D->TurnZBufferOn();
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.  Also reset the viewport back to the original.
-	m_Direct3D->SetBackBufferRenderTarget();
-	m_Direct3D->ResetViewport();
-
+	
 	return true;
 }
 
 bool ApplicationClass::Render()
 {
-	XMMATRIX worldMatrix, viewMatrix, baseViewMatrix, orthoMatrix;
+	XMMATRIX worldMatrix, baseViewMatrix, orthoMatrix; 
+	int textureCount, i; 
 	bool result;
+	
+	// Clear the buffers to begin the scene.
+	m_Direct3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f);
 
-	// Get the matrices from the camera and d3d objects.
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
 	m_Camera->GetBaseViewMatrix(baseViewMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
-	// Clear the scene.
-	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	// Begin 2D rendering and turn off the Z buffer.
+	// Also enable alpha blending as the textures have transparency in the alpha channels.
+	m_Direct3D->TurnZBufferOff();
+	m_Direct3D->EnableAlphaBlending(); 
 
-	// Turn off the Z buffer to begni all 2D rendering.
-	m_Direct3D->TurnZBufferOff(); 
+	// Get the number of textures the parallax object uses.
+	textureCount = m_ParallaxForest->GetTextureCount(); 
 
-	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext()); 
-
-	// Render the full screen ortho window using the deferred light shader and the render buffers.
-	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(),
-		worldMatrix, baseViewMatrix, orthoMatrix,
-		m_Light->GetDirection(), m_Light->GetAmbientColor(),
-		m_Camera->GetPosition(), m_DeferredBuffers->GetShaderResourceNormals(), m_SsaoRenderTexture->GetShaderResourceView(),
-		viewMatrix, m_DeferredBuffers->GetShaderResourceColors()); 
-	if (!result)
+	// Render each of the parallax scroll textures in order using the scroll shader.
+	for (i = 0; i < textureCount; i++)
 	{
-		return false;
+		// Render the full screen ortho window using the scroll shader.
+		m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext()); 
+
+		result = m_ScrollShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(),
+			worldMatrix, baseViewMatrix, orthoMatrix,
+			m_ParallaxForest->GetTexture(i), m_ParallaxForest->GetTranslation(i));
+
+		if (!result)
+		{
+			return false;
+		}
 	}
 
-	// Turn the Z buffer back on now that all 2D rendering has completed.
+	// Re-enable the Z buffer after 2D rendering complete.  Also disable alpha blending.
 	m_Direct3D->TurnZBufferOn();
+	m_Direct3D->DisableAlphaBlending();
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();
 
-	return true; 
+	return true;
 }
