@@ -139,6 +139,7 @@
     <ClCompile Include="deferredbuffersclass.cpp" />
     <ClCompile Include="deferredshaderclass.cpp" />
     <ClCompile Include="depthshaderclass.cpp" />
+    <ClCompile Include="directsoundclass.cpp" />
     <ClCompile Include="displayplaneclass.cpp" />
     <ClCompile Include="fadeshaderclass.cpp" />
     <ClCompile Include="fireshaderclass.cpp" />
@@ -175,6 +176,8 @@
     <ClCompile Include="shadermanagerclass.cpp" />
     <ClCompile Include="shadowshaderclass.cpp" />
     <ClCompile Include="softshadowshaderclass.cpp" />
+    <ClCompile Include="sound3dclass.cpp" />
+    <ClCompile Include="soundclass.cpp" />
     <ClCompile Include="specmapshaderclass.cpp" />
     <ClCompile Include="spriteclass.cpp" />
     <ClCompile Include="ssaoblurshaderclass.cpp" />
@@ -189,6 +192,8 @@
     <ClCompile Include="transparentshaderclass.cpp" />
     <ClCompile Include="viewpointclass.cpp" />
     <ClCompile Include="watershaderclass.cpp" />
+    <ClCompile Include="xaudioclass.cpp" />
+    <ClCompile Include="xaudiosoundclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alphamapshaderclass.h" />
@@ -203,6 +208,7 @@
     <ClInclude Include="deferredbuffersclass.h" />
     <ClInclude Include="deferredshaderclass.h" />
     <ClInclude Include="depthshaderclass.h" />
+    <ClInclude Include="directsoundclass.h" />
     <ClInclude Include="displayplaneclass.h" />
     <ClInclude Include="fadeshaderclass.h" />
     <ClInclude Include="fireshaderclass.h" />
@@ -238,6 +244,8 @@
     <ClInclude Include="shadermanagerclass.h" />
     <ClInclude Include="shadowshaderclass.h" />
     <ClInclude Include="softshadowshaderclass.h" />
+    <ClInclude Include="sound3dclass.h" />
+    <ClInclude Include="soundclass.h" />
     <ClInclude Include="specmapshaderclass.h" />
     <ClInclude Include="spriteclass.h" />
     <ClInclude Include="ssaoblurshaderclass.h" />
@@ -252,6 +260,8 @@
     <ClInclude Include="transparentshaderclass.h" />
     <ClInclude Include="viewpointclass.h" />
     <ClInclude Include="watershaderclass.h" />
+    <ClInclude Include="xaudioclass.h" />
+    <ClInclude Include="xaudiosoundclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="alphamap.ps" />

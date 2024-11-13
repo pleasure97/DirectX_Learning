@@ -10,16 +10,13 @@
 ///////////////////////
 #include "d3dclass.h"
 #include "inputclass.h"
-#include "timerclass.h"
-#include "cameraclass.h"
-#include "orthowindowclass.h"
-#include "parallaxscrollclass.h"
-#include "scrollshaderclass.h"
+#include "xaudioclass.h"
+#include "xaudiosoundclass.h"
 
 /////////////
 // GLOBALS //
 /////////////
-const bool FULL_SCREEN = true;
+const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_NEAR = 0.3f;
 const float SCREEN_DEPTH = 1000.f;
@@ -42,11 +39,8 @@ private:
 	bool Render(); 
 private:
 	D3DClass* m_Direct3D; 
-	TimerClass* m_Timer; 
-	CameraClass* m_Camera; 
-	OrthoWindowClass* m_FullScreenWindow;
-	ScrollShaderClass* m_ScrollShader;
-	ParallaxScrollClass* m_ParallaxForest;
+	XAudioClass* m_XAudio; 
+	XAudioSoundClass* m_TestSound1; 
 };
 
 #endif

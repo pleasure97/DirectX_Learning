@@ -7,11 +7,8 @@
 ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
-	m_Timer = 0;
-	m_Camera = 0;
-	m_FullScreenWindow = 0;
-	m_ParallaxForest = 0;
-	m_ScrollShader = 0;
+	m_XAudio = 0;
+	m_TestSound1 = 0;
 }
 
 ApplicationClass::ApplicationClass(const ApplicationClass& other)
@@ -25,7 +22,7 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
-	char configFilename[256]; 
+	char soundFilename[128]; 
 	bool result;
 
 	// Create and initialize the Direct3D object.
@@ -38,53 +35,32 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	// Create and initialize the timer object.
-	m_Timer = new TimerClass;
+	// Create and initialize the XAudio object.
+	m_XAudio = new XAudioClass;
 
-	result = m_Timer->Initialize();
+	result = m_XAudio->Initialize();
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize XAudio.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the camera object.
-	m_Camera = new CameraClass;
+	// Create and initialize the test sound object.
+	m_TestSound1 = new XAudioSoundClass;
 
-	m_Camera->SetPosition(0.f, 0.f, -10.f);
-	m_Camera->Render(); 
-	m_Camera->RenderBaseViewMatrix(); 
+	strcpy_s(soundFilename, "../DirectXEngine/data/sound01.wav");
 
-	// Create and initialize the full screen ortho window object.
-	m_FullScreenWindow = new OrthoWindowClass;
-
-	result = m_FullScreenWindow->Initialize(m_Direct3D->GetDevice(), screenWidth, screenHeight);
+	result = m_TestSound1->LoadTrack(m_XAudio->GetXAudio2(), soundFilename, 1.0f);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize test sound object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the parallax scroll forest object.
-	m_ParallaxForest = new ParallaxScrollClass;
-
-	// Set the filename of the config file.
-	strcpy_s(configFilename, "../DirectXEngine/data/config.txt");
-
-	result = m_ParallaxForest->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), configFilename);
+	// Play the test sound.
+	result = m_TestSound1->PlayTrack();
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the parallax scroll object.", L"Error", MB_OK);
-		return false;
-	}
-
-	// Create and initialize the scroll shader object.
-	m_ScrollShader = new ScrollShaderClass;
-
-	result = m_ScrollShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the scroll shader object.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -94,42 +70,24 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the scroll shader object.
-	if (m_ScrollShader)
+	// Release the test sound object.
+	if (m_TestSound1)
 	{
-		m_ScrollShader->Shutdown();
-		delete m_ScrollShader;
-		m_ScrollShader = 0;
+		// Stop the sound if it was still playing.
+		m_TestSound1->StopTrack();
+
+		// Release the test sound object.
+		m_TestSound1->ReleaseTrack();
+		delete m_TestSound1;
+		m_TestSound1 = 0;
 	}
 
-	// Release the parallax scroll forest object.
-	if (m_ParallaxForest)
+	// Release the XAudio object.
+	if (m_XAudio)
 	{
-		m_ParallaxForest->Shutdown();
-		delete m_ParallaxForest;
-		m_ParallaxForest = 0;
-	}
-
-	// Release the full screen ortho window object.
-	if (m_FullScreenWindow)
-	{
-		m_FullScreenWindow->Shutdown();
-		delete m_FullScreenWindow;
-		m_FullScreenWindow = 0;
-	}
-
-	// Release the camera object.
-	if (m_Camera)
-	{
-		delete m_Camera;
-		m_Camera = 0;
-	}
-
-	// Release the timer object.
-	if (m_Timer)
-	{
-		delete m_Timer;
-		m_Timer = 0;
+		m_XAudio->Shutdown();
+		delete m_XAudio;
+		m_XAudio = 0;
 	}
 
 	// Release the Direct3D object.
@@ -146,7 +104,6 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame(InputClass* Input)
 {
-	float frameTime; 
 	bool result;
 
 	// Check if the escape key has been pressed, if so, quit.
@@ -154,13 +111,6 @@ bool ApplicationClass::Frame(InputClass* Input)
 	{
 		return false; 
 	}
-
-	// Update the system stats.
-	m_Timer->Frame();
-	frameTime = m_Timer->GetTime();
-
-	// Do the frame processing for the parallax scroll forest object. 
-	m_ParallaxForest->Frame(frameTime); 
 
 	// Render the final graphics pipeline.
 	result = Render(); 
@@ -174,45 +124,8 @@ bool ApplicationClass::Frame(InputClass* Input)
 
 bool ApplicationClass::Render()
 {
-	XMMATRIX worldMatrix, baseViewMatrix, orthoMatrix; 
-	int textureCount, i; 
-	bool result;
-	
 	// Clear the buffers to begin the scene.
-	m_Direct3D->BeginScene(1.0f, 0.0f, 0.0f, 1.0f);
-
-	// Get the world, view, and ortho matrices from the camera and d3d objects.
-	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetBaseViewMatrix(baseViewMatrix);
-	m_Direct3D->GetOrthoMatrix(orthoMatrix);
-
-	// Begin 2D rendering and turn off the Z buffer.
-	// Also enable alpha blending as the textures have transparency in the alpha channels.
-	m_Direct3D->TurnZBufferOff();
-	m_Direct3D->EnableAlphaBlending(); 
-
-	// Get the number of textures the parallax object uses.
-	textureCount = m_ParallaxForest->GetTextureCount(); 
-
-	// Render each of the parallax scroll textures in order using the scroll shader.
-	for (i = 0; i < textureCount; i++)
-	{
-		// Render the full screen ortho window using the scroll shader.
-		m_FullScreenWindow->Render(m_Direct3D->GetDeviceContext()); 
-
-		result = m_ScrollShader->Render(m_Direct3D->GetDeviceContext(), m_FullScreenWindow->GetIndexCount(),
-			worldMatrix, baseViewMatrix, orthoMatrix,
-			m_ParallaxForest->GetTexture(i), m_ParallaxForest->GetTranslation(i));
-
-		if (!result)
-		{
-			return false;
-		}
-	}
-
-	// Re-enable the Z buffer after 2D rendering complete.  Also disable alpha blending.
-	m_Direct3D->TurnZBufferOn();
-	m_Direct3D->DisableAlphaBlending();
+	m_Direct3D->BeginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();
