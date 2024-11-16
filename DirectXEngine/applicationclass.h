@@ -10,8 +10,11 @@
 ///////////////////////
 #include "d3dclass.h"
 #include "inputclass.h"
-#include "xaudioclass.h"
-#include "xaudiosoundclass.h"
+#include "xinputclass.h"
+#include "cameraclass.h"
+#include "fontshaderclass.h"
+#include "fontclass.h"
+#include "textclass.h"
 
 /////////////
 // GLOBALS //
@@ -37,10 +40,16 @@ public:
 
 private:
 	bool Render(); 
+	bool UpdateControllerStrings(); 
 private:
 	D3DClass* m_Direct3D; 
-	XAudioClass* m_XAudio; 
-	XAudioSoundClass* m_TestSound1; 
+	XInputClass* m_XInput;
+	CameraClass* m_Camera; 
+	FontShaderClass* m_FontShader;
+	FontClass* m_Font; 
+	TextClass* m_ActiveStrings; 
+	TextClass* m_ButtonStrings; 
+	TextClass* m_TriggerStrings; 
+	TextClass* m_ThumbStrings; 
 };
-
 #endif

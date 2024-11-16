@@ -111,9 +111,28 @@ void XAudioClass::Shutdown()
 	return;
 }
 
-bool XAudioClass::Frame(X3DAUDIO_EMITTER, IXAudio2SourceVoice*)
+bool XAudioClass::Frame(X3DAUDIO_EMITTER emitter, IXAudio2SourceVoice* sourceVoice)
 {
-	return false;
+	HRESULT result;
+
+	// Call X3DAuidoCalculation to calculate new settings for the voices.
+	X3DAudioCalculate(m_X3DInstance, &m_listener, &emitter,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT | X3DAUDIO_CALCULATE_REVERB, &m_DSPSettings); 
+
+	// Use SetOutputMatrix and SetFrequencyRatio to apply the volume and pitch values to the source voice.
+	result = sourceVoice->SetOutputMatrix(m_masterVoice, 1, m_deviceDetails.InputChannels, m_DSPSettings.pMatrixCoefficients); 
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = sourceVoice->SetFrequencyRatio(m_DSPSettings.DopplerFactor); 
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	return true; 
 }
 
 IXAudio2* XAudioClass::GetXAudio2()

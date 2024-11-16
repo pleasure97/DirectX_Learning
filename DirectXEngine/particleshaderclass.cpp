@@ -6,7 +6,7 @@ ParticleShaderClass::ParticleShaderClass()
 	m_pixelShader = 0;
 	m_layout = 0;
 	m_matrixBuffer = 0;
-	m_sampleState = 0;
+	m_sampleStateWrap = 0;
 }
 
 ParticleShaderClass::ParticleShaderClass(const ParticleShaderClass&)
@@ -159,8 +159,8 @@ bool ParticleShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHA
     polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     polygonLayout[1].InstanceDataStepRate = 0;
 
-    polygonLayout[2].SemanticName = "COLOR";
-    polygonLayout[2].SemanticIndex = 0; 
+    polygonLayout[2].SemanticName = "TEXCOORD";
+    polygonLayout[2].SemanticIndex = 1; 
     polygonLayout[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; 
     polygonLayout[2].InputSlot = 0; 
     polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT; 
@@ -215,7 +215,7 @@ bool ParticleShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHA
     samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
     // Create the texture sampler state.
-    result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
+    result = device->CreateSamplerState(&samplerDesc, &m_sampleStateWrap);
     if (FAILED(result))
     {
         return false;
@@ -227,10 +227,10 @@ bool ParticleShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHA
 void ParticleShaderClass::ShutdownShader()
 {
     // Release the sampler state.
-    if (m_sampleState)
+    if (m_sampleStateWrap)
     {
-        m_sampleState->Release();
-        m_sampleState = 0;
+        m_sampleStateWrap->Release();
+        m_sampleStateWrap = 0;
     }
 
     // Release the matrix constant buffer.
@@ -354,7 +354,7 @@ void ParticleShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int i
     deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
     // Set the sampler state in the pixel shader.
-    deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+    deviceContext->PSSetSamplers(0, 1, &m_sampleStateWrap);
 
     // Render the triangle.
     deviceContext->DrawIndexed(indexCount, 0, 0);

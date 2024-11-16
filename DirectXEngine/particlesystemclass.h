@@ -7,7 +7,9 @@
 //////////////
 #include <d3d11.h>
 #include <directxmath.h>
+#include <fstream>
 using namespace DirectX;
+using namespace std;
 
 
 ///////////////////////
@@ -25,15 +27,15 @@ private:
 	{
 		XMFLOAT3 position;
 		XMFLOAT2 texture;
-		XMFLOAT4 color;
+		XMFLOAT4 data1;
 	};
 
 	struct ParticleType
 	{
-		float positionX, positionY, positionZ; 
-		float red, green, blue;
-		float velocity; 
-		bool active; 
+		float positionX, positionY, positionZ;
+		bool active;
+		float lifeTime;
+		float scroll1X, scroll1Y;
 	};
 
 public:
@@ -48,43 +50,42 @@ public:
 
 	ID3D11ShaderResourceView* GetTexture();
 	int GetIndexCount();
+	bool Reload(ID3D11Device*, ID3D11DeviceContext*);
 
 private:
-	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, char*);
-	void ReleaseTexture();
+	bool LoadParticleConfiguration();
 
 	bool InitializeParticleSystem();
 	void ShutdownParticleSystem();
 
-	bool InitializeBuffers(ID3D11Device*);
-	void ShutdownBuffers();
-	void RenderBuffers(ID3D11DeviceContext*);
-
 	void EmitParticles(float);
 	void UpdateParticles(float);
 	void KillParticles();
+	void CopyParticle(int, int);
+
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
 	bool UpdateBuffers(ID3D11DeviceContext*);
 
+	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*);
+	void ReleaseTexture();
+
 private:
-	TextureClass* m_Texture; 
-	ParticleType* m_particleList; 
-	VertexType* m_vertices; 
 	ID3D11Buffer* m_vertexBuffer;
-	ID3D11Buffer* m_indexBuffer; 
-	int m_vertexCount; 
-	int m_indexCount; 
-
-	float m_particleDeviationX, m_particleDeviationY, m_particleDeviationZ; 
-	float m_particleVelocity;
-	float m_particleVelocityVariation;
+	ID3D11Buffer* m_indexBuffer;
+	ParticleType* m_particleList;
+	VertexType* m_vertices;
+	TextureClass* m_Texture;
+	int m_vertexCount;
+	int m_indexCount;
+	char m_configFilename[256];
+	int m_maxParticles;
+	float m_particlesPerSecond;
 	float m_particleSize;
-	float m_particlesPerSecond; 
-	int m_maxParticles; 
-
-	int m_currentParticleCount; 
-	float m_accumulatedTime; 
-}
-
-
-
+	float m_particleLifeTime;
+	char m_textureFilename[256];
+	float m_accumulatedTime;
+	int m_currentParticleCount;
+};
 #endif 

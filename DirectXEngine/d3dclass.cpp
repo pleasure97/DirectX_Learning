@@ -408,6 +408,23 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 	}
 
+	// Pre multiplied alpha blend state : result = src.RGB + (dest.RGB * (1 - src.A))
+	blendStateDescription.RenderTarget[0].BlendEnable = TRUE; 
+	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; 
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_ONE; 
+	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; 
+	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO; 
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA; 
+	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; 
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f; 
+
+	// Create the blend state using description.
+	result = m_device->CreateBlendState(&blendStateDescription, &m_alphaParticleEnableBlendingState); 
+	if (FAILED(result))
+	{
+		return false; 
+	}
+
     return true;
 }
 

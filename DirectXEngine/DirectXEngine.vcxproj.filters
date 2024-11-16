@@ -219,6 +219,12 @@
     <ClCompile Include="xaudiosoundclass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="xaudiosound3dclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="xinputclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h">
@@ -417,6 +423,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="xaudiosoundclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="xaudiosound3dclass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="xinputclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

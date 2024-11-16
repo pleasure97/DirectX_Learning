@@ -2,7 +2,7 @@
 // GLOBALS //
 /////////////
 Texture2D shaderTexture : register(t0); 
-SamplerState SampleType : register(s0); 
+SamplerState SampleTypeWrap : register(s0); 
 
 //////////////
 // TYPEDEFS //
@@ -12,7 +12,8 @@ struct PixelInputType
 {
 	float4 position : SV_POSITION; 
 	float2 tex : TEXCOORD0; 
-	float4 color : COLOR; 
+	float4 data1 : TEXCOORD1;
+	float4 texCoords1 : TEXCOORD2; 
 }; 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -21,14 +22,27 @@ struct PixelInputType
 float4 ParticlePixelShader(PixelInputType input) : SV_TARGET
 {
 	float4 textureColor; 
-	float4 finalColor; 
+	float alpha; 
+	float intensity; 
 
 	// Sample the pixel color from the texture using the sampler at this texture coordinate location. 
-	textureColor = shaderTexture.Sample(SampleType, input.tex); 
+	textureColor = shaderTexture.Sample(SampleTypeWrap, input.tex); 
 
-	// Combine the texture color and the particle color to get the final color result.
-	finalColor = textureColor * input.Color; 
+	// Sample the alpha value using the translated texture coordinates instead of the regular coordinates.
+	alpha = shaderTexture.Sample(SampleTypeWarp, input.texCoords1).a; 
 
-	return finalColor; 
+	// Modify the color based on the scrolling alpha values.
+	textureColor.rgb *= alpha; 
+
+	// Get the intensity value from the lifetime of the particle.
+	intensity = input.data1.r; 
+
+	// As the particle gets older, use the lifetime as intensity to fade out the particle.
+	textureColor.rgb *= intensity; 
+
+	// Manually set the alpha.
+	textureColor.a = 1.f; 
+
+	return textureColor; 
 }
 

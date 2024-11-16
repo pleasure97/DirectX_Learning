@@ -74,6 +74,7 @@ private:
 	ID3D11BlendState* m_alphaEnableBlendingState;
 	ID3D11BlendState* m_alphaDisableBlendingState;
 	D3D11_VIEWPORT m_viewport;
+	ID3D11BlendState* m_alphaParticleEnableBlendingState; 
 };
 
 #endif

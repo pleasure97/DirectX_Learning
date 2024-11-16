@@ -193,7 +193,9 @@
     <ClCompile Include="viewpointclass.cpp" />
     <ClCompile Include="watershaderclass.cpp" />
     <ClCompile Include="xaudioclass.cpp" />
+    <ClCompile Include="xaudiosound3dclass.cpp" />
     <ClCompile Include="xaudiosoundclass.cpp" />
+    <ClCompile Include="xinputclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alphamapshaderclass.h" />
@@ -261,7 +263,9 @@
     <ClInclude Include="viewpointclass.h" />
     <ClInclude Include="watershaderclass.h" />
     <ClInclude Include="xaudioclass.h" />
+    <ClInclude Include="xaudiosound3dclass.h" />
     <ClInclude Include="xaudiosoundclass.h" />
+    <ClInclude Include="xinputclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="alphamap.ps" />
